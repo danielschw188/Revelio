@@ -1,0 +1,34 @@
+---
+title: "Tutorial"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    toc: no
+    toc_depth: 4
+    toc_float: true
+---
+
+```{r}
+library(Revelio0.1)
+datasetToAnalyse <- 'sf002'
+dataList <- readRDS(paste('~/Studium Doktorarbeit/Projects/CellCycleSorting/Scripts/Revelio_0.1/OutputDataFiles/', datasetToAnalyse, '/', datasetToAnalyse, '_FullData.rds', sep = ''))
+dataSource <- dataList@DGEs$countData
+cyclicGenesSource <- read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucketListFileLocation, 1)
+
+
+myData <- createRevelioObject(rawData = dataSource,
+                              cyclicGenes = cyclicGenesSource)
+myData <- getFilteredDataBynUMIAndnGeneThresholds(dataList = myData)
+myData <- getCellCyclePhaseAssignInformation(dataList = myData)
+myData <- getFilteredDataByCCPhaseAssignOutliers(dataList = myData)
+myData <- getNormalizedData(dataList = myData)
+myData <- getVariableGenes(dataList = myData)
+myData <- getPCAGenes(dataList = myData)
+myData <- getPCAData(dataList = myData)
+myData <- getOptimalRotations(dataList = myData)
+myData <- getRotation2D(dataList = myData)
+myData <- getCCSorting(dataList = myData)
+
+```
+
