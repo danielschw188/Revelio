@@ -1,31 +1,31 @@
 getNormalizedData <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating z-score data: ', sep = ''))
-  
+
   dataList@datasetInfo$scalingFactorUMI <- median(dataList@cellInfo$nUMI)
   dataList@DGEs$logOfFractionsData <- getLogOfFractionsData(data = dataList@DGEs$countData,
                                                             scalingFactorUMI = dataList@datasetInfo$scalingFactorUMI)
-  
+
   dataList@DGEs$scaledData <- getScaledDataFromLogOfFractions(dataList@DGEs$logOfFractionsData)
-  
+
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
 getScaledDataFromLogOfFractions <- function(data){
-  
+
   #normalize data by rows
   meanUMIForEachGene <- rowMeans(data)                                   #calculates mean UMI count per gene
   data <- sweep(data,1,meanUMIForEachGene,'-')                           #centralizes gene data
   sdUMIForEachGene <- apply(data,1,sd)                                   #calculates sd of UMI count per gene
   data <- sweep(data,1,sdUMIForEachGene,'/')                             #divides each row by sd of that gene
-  
+
   #  return(list(data, dataLogOfFractions, dataFractions, meanUMIForEachGene, sdUMIForEachGene))
   return(data)
 }
 getVariableGenes <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating variable genes: ', sep = ''))
-  
+
   variableGenes <- rep(FALSE, dim(dataList@geneInfo)[1])
   names(variableGenes) <- dataList@geneInfo[,'geneID']
   resultList <- calculateVariableGenes(data = dataList@DGEs$logOfFractionsData,
@@ -35,7 +35,7 @@ getVariableGenes <- function(dataList){
   normalizedDispersionPerGene <- resultList[['normDispPerGene']]
   variableGenes[variableGenesHelp] <- TRUE
   dataList@geneInfo <- cbind(dataList@geneInfo, variableGenes, meanGeneExpression, normalizedDispersionPerGene)
-  
+
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
@@ -46,14 +46,14 @@ calculateVariableGenes <- function(data,
                                    maxGeneExpression = 4,
                                    minNormDispersion = 0.5,
                                    maxNormDispersion = 10){
-  
+
   exponentialMean <- function(x) {
     return(log(mean(exp(x))))
   }
   logVarDividedMean <- function(x) {
     return(log(var(exp(x)-1)/mean(exp(x)-1)))
   }
-  
+
   # batchNames <- unique(batchID)
   # if (length(batchNames)>1){
   #   variableGenesAll <- as.data.frame(matrix(NA, nrow = dim(data)[1], ncol = length(batchNames)))
@@ -61,12 +61,12 @@ calculateVariableGenes <- function(data,
   #   normalizedDispersionPerGene <- rep(0, dim(data)[1])
   #   for (i in 1:length(batchNames)){
   #     dataCurrent <- data[,batchID==batchNames[i]]
-  #     
+  #
   #     meanGeneExpressionSingle <- apply(dataCurrent,1,exponentialMean)
   #     meanGeneExpressionSingle[is.na(meanGeneExpressionSingle)] <- 0
   #     dispersionPerGene <- apply(dataCurrent,1,logVarDividedMean)
   #     dispersionPerGene[is.na(dispersionPerGene)] <- 0
-  #     
+  #
   #     binsMeanGeneExpression <- cut(meanGeneExpressionSingle,numberOfBins)
   #     binnedMeanForDispersion <- tapply(dispersionPerGene,binsMeanGeneExpression,mean)
   #     binnedMeanForDispersion[is.na(binnedMeanForDispersion)] <- 0
@@ -74,10 +74,10 @@ calculateVariableGenes <- function(data,
   #     binnedSDForDispersion[is.na(binnedSDForDispersion)] <- 0
   #     normalizedDispersionPerGeneSingle <- (dispersionPerGene-binnedMeanForDispersion[as.numeric(binsMeanGeneExpression)])/binnedSDForDispersion[as.numeric(binsMeanGeneExpression)]
   #     normalizedDispersionPerGeneSingle[is.na(normalizedDispersionPerGeneSingle)] <- 0
-  #     
+  #
   #     #select variable genes
   #     variableGenesSingle <- rownames(dataCurrent)[(meanGeneExpressionSingle>minGeneExpression)&(meanGeneExpressionSingle<maxGeneExpression)&(normalizedDispersionPerGeneSingle>minNormDispersion)&(normalizedDispersionPerGeneSingle<maxNormDispersion)]
-  #     
+  #
   #     variableGenesAll[1:length(variableGenesSingle),i] <- variableGenesSingle
   #     meanGeneExpression <- meanGeneExpression + meanGeneExpressionSingle*dim(dataCurrent)[2]/dim(data)[2]
   #     normalizedDispersionPerGene <- normalizedDispersionPerGene + normalizedDispersionPerGeneSingle*dim(dataCurrent)[2]/dim(data)[2]
@@ -95,13 +95,13 @@ calculateVariableGenes <- function(data,
   #     numberOfDataSetsAVariableGeneShouldBeIn <- length(batchNames)-ceiling((length(batchNames)-1)/3)
   #   }
   #   variableGenes <- names(amountOfDataSetAVariableGeneIsFoundIn)[amountOfDataSetAVariableGeneIsFoundIn>=numberOfDataSetsAVariableGeneShouldBeIn]
-  #   
+  #
   # }else{
   meanGeneExpression <- apply(data,1,exponentialMean)
   meanGeneExpression[is.na(meanGeneExpression)] <- 0
   dispersionPerGene <- apply(data,1,logVarDividedMean)
   dispersionPerGene[is.na(dispersionPerGene)] <- 0
-  
+
   binsMeanGeneExpression <- cut(meanGeneExpression,numberOfBins)
   binnedMeanForDispersion <- tapply(dispersionPerGene,binsMeanGeneExpression,mean)
   binnedMeanForDispersion[is.na(binnedMeanForDispersion)] <- 0
@@ -109,59 +109,59 @@ calculateVariableGenes <- function(data,
   binnedSDForDispersion[is.na(binnedSDForDispersion)] <- 0
   normalizedDispersionPerGene <- (dispersionPerGene-binnedMeanForDispersion[as.numeric(binsMeanGeneExpression)])/binnedSDForDispersion[as.numeric(binsMeanGeneExpression)]
   normalizedDispersionPerGene[is.na(normalizedDispersionPerGene)] <- 0
-  
+
   #select variable genes
   variableGenes <- rownames(data[(meanGeneExpression>minGeneExpression)&(meanGeneExpression<maxGeneExpression)&(normalizedDispersionPerGene>minNormDispersion)&(normalizedDispersionPerGene<maxNormDispersion),])
   # }
-  
+
   # object@listVariableGenes$variableGenes <- variableGenes
   # object@listVariableGenes$meanGeneExpression <- meanGeneExpression
   # object@listVariableGenes$normalizedDispersionForEachGene <- normalizedDispersionPerGene
-  
+
   return(list(varGenes = variableGenes, meanGeneExpr = meanGeneExpression, normDispPerGene = normalizedDispersionPerGene))
 }
 getPCAGenes <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': determining PCA genes: ', sep = ''))
-  
+
   if (length(dataList@datasetInfo$pcaGenes) == 1){
     if (dataList@datasetInfo$pcaGenes == 'variableGenes'){
-      if (dataList@datasetInfo$intronDataExists){
-        dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = dataList@geneInfo[,'variableGenes']&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
-      }else{
+      # if (dataList@datasetInfo$intronDataExists){
+      #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = dataList@geneInfo[,'variableGenes']&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
+      # }else{
         dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = dataList@geneInfo[,'variableGenes'])
-      }
+      # }
     }else{
       if (dataList@datasetInfo$pcaGenes == 'allGenes'){
-        if (dataList@datasetInfo$intronDataExists){
-          dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = rep(TRUE, dim(dataList@geneInfo)[1])&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
-        }else{
+        # if (dataList@datasetInfo$intronDataExists){
+        #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = rep(TRUE, dim(dataList@geneInfo)[1])&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
+        # }else{
           dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = rep(TRUE, dim(dataList@geneInfo)[1]))
-        }
+        # }
       }
     }
   }else{
     pcaGenesHelp <- rep(FALSE, dim(dataList@geneInfo)[1])
     names(pcaGenesHelp) <- dataList@geneInfo[,'geneID']
     pcaGenesHelp[dataList@datasetInfo$pcaGenes[dataList@datasetInfo$pcaGenes%in%names(pcaGenesHelp)]] <- TRUE
-    if (dataList@datasetInfo$intronDataExists){
-      dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = pcaGenesHelp&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
-    }else{
+    # if (dataList@datasetInfo$intronDataExists){
+    #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = pcaGenesHelp&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
+    # }else{
       dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = pcaGenesHelp)
-    }
+    # }
   }
-  
+
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
 getPCAData <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating PCA: ', sep = ''))
-  
+
   pcaHelp <- filter(dataList@DGEs$scaledData, dataList@geneInfo[,'pcaGenes'])
   rownames(pcaHelp) <- t(subset(dataList@geneInfo, dataList@geneInfo[,'pcaGenes'], select = geneID))
   dataList@transformedData$pca <- doPCA(pcaHelp)
-  
+
   cellCycleScore <- getCellCycleScoreForPCA(dataList@transformedData$pca$data, dataList@cellInfo[,'ccPhase'])
   boolOutliers <- rep(FALSE, length(cellCycleScore))
   boolOutliers[1:(min(length(cellCycleScore),100))] <- calculateOutliersInVector(data = as.vector(cellCycleScore[1:(min(length(cellCycleScore),100))]),
@@ -169,18 +169,18 @@ getPCAData <- function(dataList){
   dataList@transformedData$pca$pcProperties <- cbind(dataList@transformedData$pca$pcProperties,
                                                      ccScore = cellCycleScore,
                                                      isComponentAssociatedWithCC = boolOutliers)
-  
+
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
 doPCA <- function(data){
-  
+
   #calculate covariance matrix
   covData <- cov(t(data))
   eigenProperties <- eigen(covData)
   eigenValuesCov <- eigenProperties$values
   eigenVectorsCov <- eigenProperties$vectors
-  
+
   #pcadata after rotation for 20 dimensions
   weightMatrix <- eigenVectorsCov
   rownames(weightMatrix) <- rownames(data)
@@ -191,9 +191,9 @@ doPCA <- function(data){
   rownames(eigenVectorsCov) <- rownames(data)
   colnames(eigenVectorsCov) <- paste('PC', 1:dim(pcaData)[2], sep = '')
   names(eigenValuesCov) <- paste('PC', 1:dim(pcaData)[2], sep = '')
-  
+
   return(list(data = t(pcaData), weights = as.data.frame(t(weightMatrix)), pcProperties = data.frame(pcID = names(eigenValuesCov), eigenValue = eigenValuesCov, row.names = NULL), eigenVectors = as.data.frame(t(eigenVectorsCov))))
-  
+
 }
 getCellCycleScoreForPCA <- function(pcaData,
                                     ccPhaseInformation){
@@ -213,7 +213,7 @@ calculateOutliersInVector <- function(data,
 calculateCCScoreSingleDimension <- function(data,
                                             ccPhaseInformation){
   ccPhaseNames <- levels(ccPhaseInformation)
-  
+
   meanOfCellCycleClusters <- matrix(0L, length(ccPhaseNames),1)
   for (i in 1:length(ccPhaseNames)){
     currentDataSet <- data[ccPhaseInformation == ccPhaseNames[i]]

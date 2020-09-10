@@ -1,9 +1,10 @@
-library(dplyr)
-library(xlsx)
-library(biomaRt)
-library(mygene)
-library(psych)
-library(DropletUtils)
+#' @import dplyr
+#' @import xlsx
+#' @import biomaRt
+#' @import mygene
+#' @import psych
+#' @import DropletUtils
+NULL
 
 setClass('Revelio',
          slots = list(datasetInfo = 'list',
@@ -24,13 +25,15 @@ setClass('Revelio',
 #'@return Returns Revelio object.
 #'
 #'
-createRevelioObject <- function(datasetID,
+createRevelioObject <- function(datasetID = 'data1',
+                                rawData = NULL,
+                                cyclicGenes = NULL,
                                 cellType = 'unknown',
                                 sequTechnique = 'unknown',
                                 dataPath = 'unknown',
-                                intronDataExists = FALSE,
-                                intronicDataPath = 'unknown',
-                                doStabilityAnalysis = FALSE,
+                                # intronDataExists = FALSE,
+                                # intronicDataPath = 'unknown',
+                                # doStabilityAnalysis = FALSE,
                                 lowernGeneCutoff = 0,
                                 uppernUMICutoff = 10^7,
                                 ccPhaseAssignBasedOnIndividualBatches = TRUE,
@@ -41,24 +44,24 @@ createRevelioObject <- function(datasetID,
                                 ccPhaseAssignThresholdHighestPhaseScore = 0.75,
                                 ccPhaseAssignThresholdSecondHighestPhaseScore = 0.5,
                                 pcaGenes = 'variableGenes',
-                                goldStandardWeights = '',
+                                # goldStandardWeights = '',
                                 thresholdsForPCWeightSignificance = 0.05,
                                 ccDurationG1 = 0.487*19.33,
                                 ccDurationS = 0.392*19.33,
                                 ccDurationG2 = 0.093*19.33,
                                 ccDurationM = 0.028*19.33,
-                                ccDurationTotal = 19.33,
-                                velTimeStep = 1,
-                                velGammaCutOff = 0.1,
-                                velSpearmanCorCutOff = 0.1,
-                                velMeanUnsplicedCutOff = 0.005,
-                                velMeanSplicedCutOff = 0.01,
-                                velCCGridAmountOfPoints = 50,
-                                velCCGridSigma = c(0.6, 1.5),
-                                velWhichThirdDimensionsToGetVelocityFor = c(3, 4, 5),
-                                stabilityIndexNumberOfIntervals = 10,
-                                stabilityIndexCorrelationType = 'kendall',
-                                stabilityIndexpValueForCorrelation = 0.05){
+                                ccDurationTotal = 19.33){
+                                # velTimeStep = 1,
+                                # velGammaCutOff = 0.1,
+                                # velSpearmanCorCutOff = 0.1,
+                                # velMeanUnsplicedCutOff = 0.005,
+                                # velMeanSplicedCutOff = 0.01,
+                                # velCCGridAmountOfPoints = 50,
+                                # velCCGridSigma = c(0.6, 1.5),
+                                # velWhichThirdDimensionsToGetVelocityFor = c(3, 4, 5),
+                                # stabilityIndexNumberOfIntervals = 10,
+                                # stabilityIndexCorrelationType = 'kendall',
+                                # stabilityIndexpValueForCorrelation = 0.05){
 
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': reading data: ', sep = ''))
@@ -73,9 +76,9 @@ createRevelioObject <- function(datasetID,
                                  cellType = cellType,
                                  sequTechnique = sequTechnique,
                                  dataPath = dataPath,
-                                 intronDataExists = intronDataExists,
-                                 intronicDataPath = intronicDataPath,
-                                 doStabilityAnalysis = doStabilityAnalysis,
+                                 # intronDataExists = intronDataExists,
+                                 # intronicDataPath = intronicDataPath,
+                                 # doStabilityAnalysis = doStabilityAnalysis,
                                  lowernGeneCutoff = lowernGeneCutoff,
                                  uppernUMICutoff = uppernUMICutoff,
                                  ccPhaseAssignBasedOnIndividualBatches = ccPhaseAssignBasedOnIndividualBatches,
@@ -86,26 +89,31 @@ createRevelioObject <- function(datasetID,
                                  ccPhaseAssignThresholdHighestPhaseScore = ccPhaseAssignThresholdHighestPhaseScore,
                                  ccPhaseAssignThresholdSecondHighestPhaseScore = ccPhaseAssignThresholdSecondHighestPhaseScore,
                                  pcaGenes = pcaGenes,
-                                 goldStandardWeights = goldStandardWeights,
+                                 # goldStandardWeights = goldStandardWeights,
                                  thresholdsForPCWeightSignificance = thresholdsForPCWeightSignificance,
                                  ccDurationG1 = ccDurationG1,
                                  ccDurationG2 = ccDurationG2,
                                  ccDurationM = ccDurationM,
-                                 ccDurationTotal = ccDurationTotal,
-                                 velTimeStep = velTimeStep,
-                                 velGammaCutOff = velGammaCutOff,
-                                 velSpearmanCorCutOff = velSpearmanCorCutOff,
-                                 velMeanUnsplicedCutOff = velMeanUnsplicedCutOff,
-                                 velMeanSplicedCutOff = velMeanSplicedCutOff,
-                                 velCCGridAmountOfPoints = velCCGridAmountOfPoints,
-                                 velCCGridSigma = velCCGridSigma,
-                                 velWhichThirdDimensionsToGetVelocityFor = velWhichThirdDimensionsToGetVelocityFor,
-                                 stabilityIndexNumberOfIntervals = stabilityIndexNumberOfIntervals,
-                                 stabilityIndexCorrelationType = stabilityIndexCorrelationType,
-                                 stabilityIndexpValueForCorrelation = stabilityIndexpValueForCorrelation)
+                                 ccDurationTotal = ccDurationTotal)
+                                 # velTimeStep = velTimeStep,
+                                 # velGammaCutOff = velGammaCutOff,
+                                 # velSpearmanCorCutOff = velSpearmanCorCutOff,
+                                 # velMeanUnsplicedCutOff = velMeanUnsplicedCutOff,
+                                 # velMeanSplicedCutOff = velMeanSplicedCutOff,
+                                 # velCCGridAmountOfPoints = velCCGridAmountOfPoints,
+                                 # velCCGridSigma = velCCGridSigma,
+                                 # velWhichThirdDimensionsToGetVelocityFor = velWhichThirdDimensionsToGetVelocityFor,
+                                 # stabilityIndexNumberOfIntervals = stabilityIndexNumberOfIntervals,
+                                 # stabilityIndexCorrelationType = stabilityIndexCorrelationType,
+                                 # stabilityIndexpValueForCorrelation = stabilityIndexpValueForCorrelation)
+    if (!is.null(rawData)){
+      dataList@DGEs$countData <- as.data.frame(rawData)
+    }
+    if (!is.null(cyclicGenes)){
+      dataList@datasetInfo$cyclicGenes <- as.data.frame(cyclicGenes)
+    }
   }
 
-  dataList@DGEs$countData <- as.data.frame(readRDS(dataList@datasetInfo$dataPath))
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
@@ -1879,7 +1887,8 @@ getCellCyclePhaseAssignInformation <- function(dataList){
                                      boolBaseColouringOnIndividualReplicates = dataList@datasetInfo$ccPhaseAssignBasedOnIndividualBatches,
                                      geneBucketListFileLocation = dataList@datasetInfo$ccPhaseAssignGeneBucketListFileLocation,
                                      geneBucketListSheetIndex = dataList@datasetInfo$ccPhaseAssignGeneBucketListSheetIndex,
-                                     corScoreGeneToAvgExprThreshold = dataList@datasetInfo$ccPhaseAssignThresholdForCorSingleGeneToAvgExpression)
+                                     corScoreGeneToAvgExprThreshold = dataList@datasetInfo$ccPhaseAssignThresholdForCorSingleGeneToAvgExpression,
+                                     cyclicGenes = dataList@datasetInfo$cyclicGenes)
   phaseScore <- resultList[['phaseScore']]
   phaseScoreNormalized <- resultList[['phaseScoreNormalized']]
   colnames(phaseScoreNormalized) <- paste(colnames(phaseScoreNormalized), '_zScore', sep = '')
@@ -1912,10 +1921,11 @@ cellCyclePhaseAssign <- function(data,
                                  nameSeparationSymbol = '_',
                                  geneBucketListFileLocation,
                                  geneBucketListSheetIndex,
-                                 corScoreGeneToAvgExprThreshold){
+                                 corScoreGeneToAvgExprThreshold,
+                                 cyclicGenes){
 
   #read excel file containing cell cycle genes for different phases
-  geneCategoriesExternal <- read.xlsx(geneBucketListFileLocation, geneBucketListSheetIndex)
+  geneCategoriesExternal <- cyclicGenes
 
   #get category names
   ccPhaseNames <- colnames(geneCategoriesExternal)
