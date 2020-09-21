@@ -1,3 +1,4 @@
+#' @export
 getNormalizedData <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating z-score data: ', sep = ''))
@@ -11,6 +12,7 @@ getNormalizedData <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 getScaledDataFromLogOfFractions <- function(data){
 
   #normalize data by rows
@@ -22,6 +24,7 @@ getScaledDataFromLogOfFractions <- function(data){
   #  return(list(data, dataLogOfFractions, dataFractions, meanUMIForEachGene, sdUMIForEachGene))
   return(data)
 }
+#' @export
 getVariableGenes <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating variable genes: ', sep = ''))
@@ -39,6 +42,7 @@ getVariableGenes <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 calculateVariableGenes <- function(data,
                                    batchID,
                                    numberOfBins = 20,
@@ -120,6 +124,7 @@ calculateVariableGenes <- function(data,
 
   return(list(varGenes = variableGenes, meanGeneExpr = meanGeneExpression, normDispPerGene = normalizedDispersionPerGene))
 }
+#' @export
 getPCAGenes <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': determining PCA genes: ', sep = ''))
@@ -154,11 +159,12 @@ getPCAGenes <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 getPCAData <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating PCA: ', sep = ''))
 
-  pcaHelp <- filter(dataList@DGEs$scaledData, dataList@geneInfo[,'pcaGenes'])
+  pcaHelp <- dplyr::filter(dataList@DGEs$scaledData, dataList@geneInfo[,'pcaGenes'])
   rownames(pcaHelp) <- t(subset(dataList@geneInfo, dataList@geneInfo[,'pcaGenes'], select = geneID))
   dataList@transformedData$pca <- doPCA(pcaHelp)
 
@@ -173,6 +179,7 @@ getPCAData <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 doPCA <- function(data){
 
   #calculate covariance matrix
@@ -195,6 +202,7 @@ doPCA <- function(data){
   return(list(data = t(pcaData), weights = as.data.frame(t(weightMatrix)), pcProperties = data.frame(pcID = names(eigenValuesCov), eigenValue = eigenValuesCov, row.names = NULL), eigenVectors = as.data.frame(t(eigenVectorsCov))))
 
 }
+#' @export
 getCellCycleScoreForPCA <- function(pcaData,
                                     ccPhaseInformation){
   numberOfPCs <- dim(pcaData)[1]
@@ -205,11 +213,13 @@ getCellCycleScoreForPCA <- function(pcaData,
   }
   return(scoreCorrelationOfCellCycleToEachPC)
 }
+#' @export
 calculateOutliersInVector <- function(data,
                                       outlierThreshold = 2){
   return((abs(data - mean(data)) / sd(data))>outlierThreshold)
   #return((abs(data - median(data)) / mad(data))>outlierThreshold)
 }
+#' @export
 calculateCCScoreSingleDimension <- function(data,
                                             ccPhaseInformation){
   ccPhaseNames <- levels(ccPhaseInformation)

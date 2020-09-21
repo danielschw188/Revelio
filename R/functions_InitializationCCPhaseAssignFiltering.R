@@ -1,11 +1,6 @@
 #' @import dplyr
-#' @import xlsx
-#' @import biomaRt
-#' @import mygene
-#' @import psych
-#' @import DropletUtils
-NULL
-
+#' @importFrom magrittr %>%
+#'
 setClass('Revelio',
          slots = list(datasetInfo = 'list',
                       DGEs = 'list',
@@ -14,17 +9,16 @@ setClass('Revelio',
                       transformedData = 'list',
                       velocityData = 'list',
                       stabilityIndex = 'list'))
-
 #'Create Revelio Object.
 #'
 #' 'createRevelioObject' returns a Revelio object according to the specified parameters.
 #'
 #'testtest
 #'
-#'@param datasetID ID should correspond to ID provided in supplementary file.
-#'@return Returns Revelio object.
+#' @param datasetID ID should correspond to ID provided in supplementary file.
+#' @return Returns Revelio object.
 #'
-#'
+#' @export
 createRevelioObject <- function(datasetID = 'data1',
                                 rawData = NULL,
                                 cyclicGenes = NULL,
@@ -118,6 +112,7 @@ createRevelioObject <- function(datasetID = 'data1',
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 defineDatasetParameters <- function(){
   datasetInfo <- list(sf002 = list(datasetID = 'sf002',
                                    cellType = 'HeLa',
@@ -1806,6 +1801,7 @@ defineDatasetParameters <- function(){
 
   return(datasetInfo)
 }
+#' @export
 getFilteredDataBynUMIAndnGeneThresholds <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': filtering data by nGene and nUMI thresholds: ', sep = ''))
@@ -1814,15 +1810,16 @@ getFilteredDataBynUMIAndnGeneThresholds <- function(dataList){
 
   filteredCells <- as.character(t(subset(dataList@cellInfo, nUMI<dataList@datasetInfo$uppernUMICutoff & nGene>dataList@datasetInfo$lowernGeneCutoff, select = 'cellID')))
   dataList@DGEs$countData <- dataList@DGEs$countData[,filteredCells]
-  dataList@geneInfo <- filter(dataList@geneInfo, rowSums(dataList@DGEs$countData)>0)
+  dataList@geneInfo <- dplyr::filter(dataList@geneInfo, rowSums(dataList@DGEs$countData)>0)
   dataList@DGEs$countData <- dataList@DGEs$countData[rowSums(dataList@DGEs$countData)>0,]
-  dataList@cellInfo <- filter(dataList@cellInfo, cellID%in%filteredCells)
+  dataList@cellInfo <- dplyr::filter(dataList@cellInfo, cellID%in%filteredCells)
 
   dataList <- getStatisticsOnCellsAndGenes(dataList = dataList)
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 getStatisticsOnCellsAndGenes <- function(dataList){
   #raw data for current list element
   currentData <- dataList@DGEs$countData
@@ -1874,6 +1871,7 @@ getStatisticsOnCellsAndGenes <- function(dataList){
   #rm(currentData, batchInfo)
   return(dataList)
 }
+#' @export
 getCellCyclePhaseAssignInformation <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': assigning cell cycle phases: ', sep = ''))
@@ -1915,6 +1913,7 @@ getCellCyclePhaseAssignInformation <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 cellCyclePhaseAssign <- function(data,
                                  batchIDInformation,
                                  boolBaseColouringOnIndividualReplicates,
@@ -1990,7 +1989,7 @@ cellCyclePhaseAssign <- function(data,
       }
     }
 
-    #filter out genes behaving differently in our data
+    #dplyr::filter out genes behaving differently in our data
     for (i in 1:length(ccPhaseNames)){
       numberOfValidGenes <- sum(corScore[,i] > corScoreGeneToAvgExprThreshold)
       geneNames[1:numberOfValidGenes, i] <- geneNames[corScore[,i] > corScoreGeneToAvgExprThreshold, i]
@@ -2063,6 +2062,7 @@ cellCyclePhaseAssign <- function(data,
 
   return(list(ccPhase = ccPhaseInformationAlgorithm, phaseScore = phaseScoreCellsBeforeNormalizationAll, phaseScoreNormalized = phaseScoreCellsAll, highestPhaseScore = highestPhaseScoreAll, secondHighestPhaseScore = secondHighestPhaseScoreAll, geneCCPhase = ccPhaseAssignOfGenes))
 }
+#' @export
 getLogOfFractionsData <- function(data,
                                   scalingFactorUMI){
 
@@ -2074,15 +2074,16 @@ getLogOfFractionsData <- function(data,
   return(data)
 }
 
+#' @export
 getFilteredDataByCCPhaseAssignOutliers <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': filtering data by cc phase outliers: ', sep = ''))
 
   filteredCells <- as.character(t(subset(dataList@cellInfo, !(isOutlierSuspectedDoublets|isOutlierNoConfidenceInPhaseScore), select = 'cellID')))
   dataList@DGEs$countData <- dataList@DGEs$countData[,filteredCells]
-  dataList@geneInfo <- filter(dataList@geneInfo, rowSums(dataList@DGEs$countData)>0)
+  dataList@geneInfo <- dplyr::filter(dataList@geneInfo, rowSums(dataList@DGEs$countData)>0)
   dataList@DGEs$countData <- dataList@DGEs$countData[rowSums(dataList@DGEs$countData)>0,]
-  dataList@cellInfo <- filter(dataList@cellInfo, cellID%in%filteredCells)
+  dataList@cellInfo <- dplyr::filter(dataList@cellInfo, cellID%in%filteredCells)
 
   dataList <- getStatisticsOnCellsAndGenes(data = dataList)
 

@@ -10,11 +10,12 @@ output:
 ---
 
 ```{r}
-library(Revelio0.1)
+library(Revelio)
+library(xlsx)
 datasetToAnalyse <- 'sf002'
 dataList <- readRDS(paste('~/Studium Doktorarbeit/Projects/CellCycleSorting/Scripts/Revelio_0.1/OutputDataFiles/', datasetToAnalyse, '/', datasetToAnalyse, '_FullData.rds', sep = ''))
 dataSource <- dataList@DGEs$countData
-cyclicGenesSource <- read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucketListFileLocation, 1)
+cyclicGenesSource <- xlsx::read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucketListFileLocation, 1)
 
 
 myData <- createRevelioObject(rawData = dataSource,

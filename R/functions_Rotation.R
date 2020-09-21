@@ -1,3 +1,4 @@
+#' @export
 getOptimalRotations <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating optimal rotations: ', sep = ''))
@@ -24,6 +25,7 @@ getOptimalRotations <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 calculateOptimalRotation <- function(pcaData,
                                      pcaWeights,
                                      pcaIsPCAssociatedWithCC,
@@ -114,6 +116,7 @@ calculateOptimalRotation <- function(pcaData,
 
   return(list(data = t(rotatedData), weights = t(rotatedWeightMatrix), rotationMatrix = rotationMatrix, dcProperties = data.frame(dcID = paste('DC', 1:dim(rotatedData)[2], sep = ''), diagCovOfData = diag(cov(rotatedData))), sequenceOfViewingAxes = sequenceOfViewingAxis))
 }
+#' @export
 getGoldenSpiral <- function(numberOfPoints = 10^4){
 
   golden_angle <- pi * (1 + sqrt(5))
@@ -132,6 +135,7 @@ getGoldenSpiral <- function(numberOfPoints = 10^4){
 
   return (points)
 }
+#' @export
 getGridAroundAxis <- function(viewingAxisForGrid,
                               numberOfPoints = 10^4,
                               maxRadius = 0.1){
@@ -162,6 +166,7 @@ getGridAroundAxis <- function(viewingAxisForGrid,
 
   return(rotatedPointsOnSphere)
 }
+#' @export
 getBestViewingAxisMinimizingDispersionInThirdDimension <- function(data,
                                                                    gridToUse,
                                                                    ccPhaseInformation,
@@ -228,6 +233,7 @@ getBestViewingAxisMinimizingDispersionInThirdDimension <- function(data,
 
   return(bestViewingAxis)
 }
+#' @export
 getRotationMatrix3D <- function(viewingAxis){
 
   zRotation <- 0
@@ -246,9 +252,11 @@ getRotationMatrix3D <- function(viewingAxis){
 
   return(t(rotMatrixZ %*% rotMatrixY %*% rotMatrixX))
 }
+#' @export
 euclideanDistance <- function(x,y){
   return(sqrt(sum((x-y)^2)))
 }
+#' @export
 getPolarCoordinates <- function(data,
                                 boolGetCCTime = FALSE){
   locDataX <- data[,1]
@@ -281,20 +289,22 @@ getPolarCoordinates <- function(data,
 
   return(dataNew)
 }
+#' @export
 getRotation2D <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': finding optimal 2D alignment: ', sep = ''))
 
   dataList <- alignCellDivisionToXAxis(dataList)
 
-  if (!(any(dataList@datasetInfo$goldStandardWeights == '')|is.null(dataList@datasetInfo$goldStandardWeights))){
-    dataList <- alignCellCycleToGoldStandard(dataList,
-                                             weightsGoldStandard = dataList@datasetInfo$goldStandardWeights)
-  }
+  # if (!(any(dataList@datasetInfo$goldStandardWeights == '')|is.null(dataList@datasetInfo$goldStandardWeights))){
+  #   dataList <- alignCellCycleToGoldStandard(dataList,
+  #                                            weightsGoldStandard = dataList@datasetInfo$goldStandardWeights)
+  # }
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#' @export
 alignCellDivisionToXAxis <- function(dataList){
   source('~/Studium Doktorarbeit/Projects/CellCycleSorting/Scripts/getPolarCoordinates.R')
   source('~/Studium Doktorarbeit/Projects/CellCycleSorting/Scripts/calculateAverageUMIPerIntervalBasedOnIndex.R')
@@ -379,13 +389,13 @@ alignCellCycleToGoldStandard <- function(dataList,
     convertMouseGeneList <- function(x){
 
       #require("biomaRt")
-      human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-      mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+      human = biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+      mouse = biomaRt::useMart("ensembl", dataset = "mmusculus_gene_ensembl")
 
       #genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
       #humanx <- genesV2[, 2]
 
-      mouseGenes <- queryMany(x, scopes="symbol", fields="ensembl.gene", species="mouse")
+      mouseGenes <- mygene::queryMany(x, scopes="symbol", fields="ensembl.gene", species="mouse")
       mouseGenesID <- lapply(mouseGenes@listData$ensembl,'[[',1)
       for (i in 1:length(mouseGenesID)){
         if (length(mouseGenesID[[i]])>1){
@@ -402,7 +412,7 @@ alignCellCycleToGoldStandard <- function(dataList,
       mouseGenesIDShortened <- mouseGenesID[!(mouseGenesID=='NULL')]
       #mouseGenesNamesShortened <- mouseGenesNames[!(mouseGenesID=='NULL')]
 
-      genesV2 = getLDS(attributes = c("ensembl_gene_id","mgi_symbol"), filters = "ensembl_gene_id", values = mouseGenesIDShortened , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
+      genesV2 = biomaRt::getLDS(attributes = c("ensembl_gene_id","mgi_symbol"), filters = "ensembl_gene_id", values = mouseGenesIDShortened , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
 
       indexOfGenesWhereNoAssociatedHumanGeneIsFound <- !(mouseGenesID%in%genesV2[,1])
       matchOfIndexes <- match(mouseGenesID[(mouseGenesID%in%genesV2[,1])], genesV2[,1])
@@ -477,6 +487,7 @@ alignCellCycleToGoldStandard <- function(dataList,
 
   return(dataList)
 }
+#' @export
 getCCSorting <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': getting cell cycle sorting info: ', sep = ''))
