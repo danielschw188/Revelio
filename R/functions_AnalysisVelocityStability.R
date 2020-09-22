@@ -1,4 +1,3 @@
-#' @export
 getExtrapolatedStateInDCSpace <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating extrapolated state: ', sep = ''))
@@ -12,7 +11,6 @@ getExtrapolatedStateInDCSpace <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
-#' @export
 extrapolatedStateFromVelocityModelI <- function(dataList){
 
   velocity <- dataList@velocityData$RNAvelocity[dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes], colnames(dataList@DGEs$countData)]
@@ -25,7 +23,6 @@ extrapolatedStateFromVelocityModelI <- function(dataList){
 
   return(normalizedExtrapolatedState)
 }
-#' @export
 transformExtrapolatedStateModelIToRotatedPCA <- function(dataList,
                                                          extrapolatedStateNormalized,
                                                          numberOfDimensionsToGet = 2){
@@ -49,7 +46,6 @@ transformExtrapolatedStateModelIToRotatedPCA <- function(dataList,
 
   return(dataList)
 }
-#' @export
 getVelocityGridsCC <- function(dataList){
 
   for (i in dataList@datasetInfo$velCCGridSigma){
@@ -62,7 +58,6 @@ getVelocityGridsCC <- function(dataList){
 
   return(dataList)
 }
-#' @export
 calculateVelocityCCGridDisplacement <- function(dataList,
                                                 sigma = 1){
   originalStateInRotatedSpace <- t(dataList@transformedData$dc$data[c(1,2),])
@@ -95,7 +90,6 @@ calculateVelocityCCGridDisplacement <- function(dataList,
 
   return(dataList)
 }
-#' @export
 getVelocityGridsAlongThirdDimensions <- function(dataList){
 
   for (i in dataList@datasetInfo$velWhichThirdDimensionsToGetVelocityFor){
@@ -109,7 +103,6 @@ getVelocityGridsAlongThirdDimensions <- function(dataList){
 
   return(dataList)
 }
-#' @export
 calculateVelocityGridAlongThirdDimension <- function(dataList,
                                                      whichThirdDimension = 3,
                                                      sigma = 1){
@@ -201,7 +194,6 @@ calculateVelocityGridAlongThirdDimension <- function(dataList,
 
   return(dataList)
 }
-#' @export
 getStabilityIndexAlongCC <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': doing stability analysis: ', sep = ''))
@@ -215,7 +207,7 @@ getStabilityIndexAlongCC <- function(dataList){
   baseCountToDownsampleTo <- (quantile(colSums(dataToDownsample)))[2]
   downsampleFractions <- baseCountToDownsampleTo/colSums(dataToDownsample)
   downsampleFractions <- pmin(downsampleFractions, 1)
-  dataDownsampled <- downsampleMatrix(dataToDownsample, prop = downsampleFractions, bycol = TRUE)
+  dataDownsampled <- psych::downsampleMatrix(dataToDownsample, prop = downsampleFractions, bycol = TRUE)
   countUMIPerCell <- colSums(dataDownsampled)                                   #gives total UMI count per cell
   dataDownsampledLogOfFractions <- sweep(dataDownsampled,2,countUMIPerCell,'/')                          #divides each column by total UMI count for that cell
   dataDownsampledLogOfFractions <- dataDownsampledLogOfFractions*baseCountToDownsampleTo                                                     #multiplies every entry by 10^4 as a scaling factor
@@ -336,8 +328,8 @@ getStabilityIndexAlongCC <- function(dataList){
       #   counterGeneVector <- counterGeneVector+length(corSave)-1
       # }
 
-      corTestValuesCell <- corr.test(dataRawMatrix[,currentCells], adjust = "none", ci = FALSE, method = correlationType)
-      corTestValuesGene <- corr.test(t(dataRawMatrix[,currentCells]), adjust = "none", ci = FALSE, method = correlationType)
+      corTestValuesCell <- psych::corr.test(dataRawMatrix[,currentCells], adjust = "none", ci = FALSE, method = correlationType)
+      corTestValuesGene <- psych::corr.test(t(dataRawMatrix[,currentCells]), adjust = "none", ci = FALSE, method = correlationType)
 
       cellCorVectorCurrent <- corTestValuesCell$r
       cellPValueVectorCurrent <- corTestValuesCell$p

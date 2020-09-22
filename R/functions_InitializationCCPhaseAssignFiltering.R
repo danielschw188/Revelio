@@ -1,5 +1,6 @@
 #' @import dplyr
 #' @importFrom magrittr %>%
+#' @importFrom methods new
 #'
 setClass('Revelio',
          slots = list(datasetInfo = 'list',
@@ -9,6 +10,9 @@ setClass('Revelio',
                       transformedData = 'list',
                       velocityData = 'list',
                       stabilityIndex = 'list'))
+#'
+#'
+#'
 #'Create Revelio Object.
 #'
 #' 'createRevelioObject' returns a Revelio object according to the specified parameters.
@@ -108,11 +112,11 @@ createRevelioObject <- function(datasetID = 'data1',
     }
   }
 
+  dataList <- getFilteredDataBynUMIAndnGeneThresholds(dataList = dataList)
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
-#' @export
 defineDatasetParameters <- function(){
   datasetInfo <- list(sf002 = list(datasetID = 'sf002',
                                    cellType = 'HeLa',
@@ -1801,10 +1805,9 @@ defineDatasetParameters <- function(){
 
   return(datasetInfo)
 }
-#' @export
 getFilteredDataBynUMIAndnGeneThresholds <- function(dataList){
-  startTime <- Sys.time()
-  cat(paste(Sys.time(), ': filtering data by nGene and nUMI thresholds: ', sep = ''))
+  # startTime <- Sys.time()
+  # cat(paste(Sys.time(), ': filtering data by nGene and nUMI thresholds: ', sep = ''))
 
   dataList <- getStatisticsOnCellsAndGenes(dataList = dataList)
 
@@ -1816,10 +1819,9 @@ getFilteredDataBynUMIAndnGeneThresholds <- function(dataList){
 
   dataList <- getStatisticsOnCellsAndGenes(dataList = dataList)
 
-  cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
+  # cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
-#' @export
 getStatisticsOnCellsAndGenes <- function(dataList){
   #raw data for current list element
   currentData <- dataList@DGEs$countData
@@ -1910,10 +1912,12 @@ getCellCyclePhaseAssignInformation <- function(dataList){
   #combine data
   dataList@cellInfo <- cbind(dataList@cellInfo, phaseAssignStatistics)
 
+  #filter outliers
+  dataList <- getFilteredDataByCCPhaseAssignOutliers(dataList = dataList)
+
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
-#' @export
 cellCyclePhaseAssign <- function(data,
                                  batchIDInformation,
                                  boolBaseColouringOnIndividualReplicates,
@@ -2062,7 +2066,6 @@ cellCyclePhaseAssign <- function(data,
 
   return(list(ccPhase = ccPhaseInformationAlgorithm, phaseScore = phaseScoreCellsBeforeNormalizationAll, phaseScoreNormalized = phaseScoreCellsAll, highestPhaseScore = highestPhaseScoreAll, secondHighestPhaseScore = secondHighestPhaseScoreAll, geneCCPhase = ccPhaseAssignOfGenes))
 }
-#' @export
 getLogOfFractionsData <- function(data,
                                   scalingFactorUMI){
 
@@ -2073,11 +2076,9 @@ getLogOfFractionsData <- function(data,
 
   return(data)
 }
-
-#' @export
 getFilteredDataByCCPhaseAssignOutliers <- function(dataList){
-  startTime <- Sys.time()
-  cat(paste(Sys.time(), ': filtering data by cc phase outliers: ', sep = ''))
+  # startTime <- Sys.time()
+  # cat(paste(Sys.time(), ': filtering data by cc phase outliers: ', sep = ''))
 
   filteredCells <- as.character(t(subset(dataList@cellInfo, !(isOutlierSuspectedDoublets|isOutlierNoConfidenceInPhaseScore), select = 'cellID')))
   dataList@DGEs$countData <- dataList@DGEs$countData[,filteredCells]
@@ -2087,6 +2088,6 @@ getFilteredDataByCCPhaseAssignOutliers <- function(dataList){
 
   dataList <- getStatisticsOnCellsAndGenes(data = dataList)
 
-  cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
+  # cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }

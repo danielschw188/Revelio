@@ -1,4 +1,3 @@
-#' @export
 readIntronicDataAndFilter <- function(dataList){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': reading intronic data: ', sep = ''))
@@ -25,7 +24,6 @@ readIntronicDataAndFilter <- function(dataList){
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
-#' @export
 getVelocityMatrix <- function(dataList){
 
   startTime <- Sys.time()
@@ -50,7 +48,6 @@ getVelocityMatrix <- function(dataList){
 
   return(dataList)
 }
-#' @export
 offsetEstimation <- function(dataList){
 
   dataUnspliced <- dataList@DGEs$intronCountData[intersect(rownames(dataList@DGEs$intronCountData), rownames(dataList@DGEs$countData)), intersect(colnames(dataList@DGEs$intronCountData), colnames(dataList@DGEs$countData))]
@@ -74,7 +71,6 @@ offsetEstimation <- function(dataList){
 
   return(dataList)
 }
-#' @export
 gammaEstimation <- function(dataList){
 
   dataUnspliced <- dataList@DGEs$intronCountData[intersect(rownames(dataList@DGEs$intronCountData), rownames(dataList@DGEs$countData)), intersect(colnames(dataList@DGEs$intronCountData), colnames(dataList@DGEs$countData))]
@@ -104,7 +100,6 @@ gammaEstimation <- function(dataList){
 
   return(dataList)
 }
-#' @export
 calculateRNAvelocity <- function(dataList){
 
   dataUnspliced <- dataList@DGEs$intronCountData[intersect(rownames(dataList@DGEs$intronCountData), rownames(dataList@DGEs$countData)), intersect(colnames(dataList@DGEs$intronCountData), colnames(dataList@DGEs$countData))]
@@ -127,7 +122,6 @@ calculateRNAvelocity <- function(dataList){
 
   return(dataList)
 }
-#' @export
 getNormalizedDataBySpecificVector <- function(data,
                                               divideByCustomVector = NULL){
   return(sweep(data,2,divideByCustomVector,'/'))

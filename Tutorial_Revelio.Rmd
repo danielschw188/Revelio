@@ -20,16 +20,9 @@ cyclicGenesSource <- xlsx::read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucke
 
 myData <- createRevelioObject(rawData = dataSource,
                               cyclicGenes = cyclicGenesSource)
-myData <- getFilteredDataBynUMIAndnGeneThresholds(dataList = myData)
 myData <- getCellCyclePhaseAssignInformation(dataList = myData)
-myData <- getFilteredDataByCCPhaseAssignOutliers(dataList = myData)
-myData <- getNormalizedData(dataList = myData)
-myData <- getVariableGenes(dataList = myData)
-myData <- getPCAGenes(dataList = myData)
 myData <- getPCAData(dataList = myData)
-myData <- getOptimalRotations(dataList = myData)
-myData <- getRotation2D(dataList = myData)
-myData <- getCCSorting(dataList = myData)
+myData <- getOptimalRotation(dataList = myData)
 
 ```
 
