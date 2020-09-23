@@ -6,23 +6,19 @@
 \title{Create Revelio Object.}
 \usage{
 createRevelioObject(
+  rawData,
+  cyclicGenes,
   datasetID = "data1",
-  rawData = NULL,
-  cyclicGenes = NULL,
   cellType = "unknown",
   sequTechnique = "unknown",
-  dataPath = "unknown",
-  lowernGeneCutoff = 0,
+  lowernGeneCutoff = 1200,
   uppernUMICutoff = 10^7,
   ccPhaseAssignBasedOnIndividualBatches = TRUE,
-  ccPhaseAssignGeneBucketListFileLocation = "unknown",
-  ccPhaseAssignGeneBucketListSheetIndex = 1,
   ccPhaseAssignThresholdForCorSingleGeneToAvgExpression = 0.2,
   ccPhaseAssignMaxDiffOfCCPhasesBetweenHighestScores = 1,
   ccPhaseAssignThresholdHighestPhaseScore = 0.75,
   ccPhaseAssignThresholdSecondHighestPhaseScore = 0.5,
   pcaGenes = "variableGenes",
-  thresholdsForPCWeightSignificance = 0.05,
   ccDurationG1 = 0.487 * 19.33,
   ccDurationS = 0.392 * 19.33,
   ccDurationG2 = 0.093 * 19.33,
@@ -31,7 +27,41 @@ createRevelioObject(
 )
 }
 \arguments{
-\item{datasetID}{ID should correspond to ID provided in supplementary file.}
+\item{rawData}{A genes-by-cells matrix of raw sequencing data. Rows should contain gene names, columns should contain cell IDs, entries of the matrix are integer numbers.}
+
+\item{cyclicGenes}{A matrix containing marker genes for known cell cycle phases. Each column contains a list of known marker genes corresponding to a specific cell cycle phase/phase transition. The name of that transition should be given as the column name.}
+
+\item{datasetID}{(Optional) String to identify the current analysis.}
+
+\item{cellType}{(Optional) String that indentifies the cell type of the data that is being analyzed.}
+
+\item{sequTechnique}{(Optional) String that identifies the sequencing technique used to obtain the raw data.}
+
+\item{lowernGeneCutoff}{Integer number that defines the minimum number of detected genes per cell. (Lower threshold for quality control.)}
+
+\item{uppernUMICutoff}{Integer number that defines the maximum number of UMIs per cell. (Upper threshold for removing possible doublets.)}
+
+\item{ccPhaseAssignBasedOnIndividualBatches}{In case the data is made up of different batches, this boolean decides whether the in silico phase assignment is done for each batch individually or for the entire data set simultaneously. Batch separation during phase assignment is advised since batch effects may otherwise influence phase assignment.}
+
+\item{ccPhaseAssignThresholdForCorSingleGeneToAvgExpression}{During phase assignment, population expression for individual genes is compared to average population expression of the entire marker gene list. If the correlation is lower than this defined parameter, it is concluded that this gene behaves differently in the investigated data set than expected and is consequently removed from the marker gene set.}
+
+\item{ccPhaseAssignMaxDiffOfCCPhasesBetweenHighestScores}{If set to 1, it means that the second highest z-score during phase assignment must be contained in one of the neighbouring cell cycle phase to where the highest score is detected.}
+
+\item{ccPhaseAssignThresholdHighestPhaseScore}{Each cell is assigned a z-score for each of the cell cycle phases contained in 'cyclicGenes'. The phase corresponding to the highest score wins. The highest phase score has to pass this parameter threshold, otherwise the cell is filtered out as its gene expression is cell cycle markers is not strong enough.}
+
+\item{ccPhaseAssignThresholdSecondHighestPhaseScore}{See 'ccPhaseAssignThresholdHighestPhaseScore'. This parameter defines a similar threshold but for the second highest score.}
+
+\item{pcaGenes}{If 'variableGenes' then only variable genes are utilized during application of PCA. If 'allGenes' then all genes detected during sequencing are used.}
+
+\item{ccDurationG1}{Double that estimates the duration in hours of G1 phase.}
+
+\item{ccDurationS}{Double that estimates the duration in hours of S phase.}
+
+\item{ccDurationG2}{Double that estimates the duration in hours of G2 phase.}
+
+\item{ccDurationM}{Double that estimates the duration in hours of M phase.}
+
+\item{ccDurationTotal}{Double that estimates the duration in hours of the cell cycle.}
 }
 \value{
 Returns Revelio object.
@@ -40,5 +70,5 @@ Returns Revelio object.
 'createRevelioObject' returns a Revelio object according to the specified parameters.
 }
 \details{
-testtest
+A matrix of raw sequencing data as well as a table of marker gene lists have to be provided
 }

@@ -16,7 +16,7 @@ getOptimalRotation <- function(dataList){
                                                     ccScore = cellCycleScore,
                                                     isComponentAssociatedWithCC = boolOutliers)
 
-  thresholdForPCWeightToBeSignificant <- dataList@datasetInfo$thresholdsForPCWeightSignificance
+  thresholdForPCWeightToBeSignificant <- sqrt(1/dim(dataList@transformedData$pca$data)[1])
   ccGenesHelp <- rep(FALSE, dim(dataList@geneInfo)[1])
   names(ccGenesHelp) <- dataList@geneInfo[,'geneID']
   ccGenesHelp[dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes][which((abs(dataList@transformedData$dc$weights[1,])>thresholdForPCWeightToBeSignificant)|(abs(dataList@transformedData$dc$weights[2,])>thresholdForPCWeightToBeSignificant))]] <- TRUE
