@@ -32,11 +32,11 @@ setClass('Revelio',
 #' @param ccPhaseAssignThresholdHighestPhaseScore Each cell is assigned a z-score for each of the cell cycle phases contained in 'cyclicGenes'. The phase corresponding to the highest score wins. The highest phase score has to pass this parameter threshold, otherwise the cell is filtered out as its gene expression is cell cycle markers is not strong enough.
 #' @param ccPhaseAssignThresholdSecondHighestPhaseScore See 'ccPhaseAssignThresholdHighestPhaseScore'. This parameter defines a similar threshold but for the second highest score.
 #' @param pcaGenes If 'variableGenes' then only variable genes are utilized during application of PCA. If 'allGenes' then all genes detected during sequencing are used.
-#' @param ccDurationG1 Double that estimates the duration in hours of G1 phase.
-#' @param ccDurationS Double that estimates the duration in hours of S phase.
-#' @param ccDurationG2 Double that estimates the duration in hours of G2 phase.
-#' @param ccDurationM Double that estimates the duration in hours of M phase.
-#' @param ccDurationTotal Double that estimates the duration in hours of the cell cycle.
+#' @param ccDurationG1 Double that estimates the duration in hours of G1 phase. Default value corresponds to at typical HEK cycle.
+#' @param ccDurationS Double that estimates the duration in hours of S phase. Default value corresponds to at typical HEK cycle.
+#' @param ccDurationG2 Double that estimates the duration in hours of G2 phase. Default value corresponds to at typical HEK cycle.
+#' @param ccDurationM Double that estimates the duration in hours of M phase. Default value corresponds to at typical HEK cycle.
+#' @param ccDurationTotal Double that estimates the duration in hours of the cell cycle. Default value corresponds to at typical HEK cycle.
 #' @return Returns a Revelio object containing the custom sequencing data for further analysis.
 #'
 #' @export
@@ -158,6 +158,17 @@ getStatisticsOnCellsAndGenes <- function(dataList){
   #rm(currentData, batchInfo)
   return(dataList)
 }
+#'
+#'
+#' Assign Cell Cycle Phases.
+#'
+#' 'getCellCyclePhaseAssignInformation' assigns a cell cycle phase to each cell.
+#'
+#' The gene expression of each gene is compared to the gene expression of the different marker gene lists supplied as cyclicGenes when creating the Revelio Object. Each cell receives a score for each of the given cell cycle phases. The phase corresponding to the highest score is the assigned cell cycle phase.
+#'
+#' @param dataList A Revelio object that contains a raw data matrix and a table of marker gene lists.
+#' @return Returns the same Revelio object given as input with the cell cycle phase assign information added.
+#'
 #' @export
 getCellCyclePhaseAssignInformation <- function(dataList){
   startTime <- Sys.time()

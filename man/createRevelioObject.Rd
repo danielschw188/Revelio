@@ -53,22 +53,22 @@ createRevelioObject(
 
 \item{pcaGenes}{If 'variableGenes' then only variable genes are utilized during application of PCA. If 'allGenes' then all genes detected during sequencing are used.}
 
-\item{ccDurationG1}{Double that estimates the duration in hours of G1 phase.}
+\item{ccDurationG1}{Double that estimates the duration in hours of G1 phase. Default value corresponds to at typical HEK cycle.}
 
-\item{ccDurationS}{Double that estimates the duration in hours of S phase.}
+\item{ccDurationS}{Double that estimates the duration in hours of S phase. Default value corresponds to at typical HEK cycle.}
 
-\item{ccDurationG2}{Double that estimates the duration in hours of G2 phase.}
+\item{ccDurationG2}{Double that estimates the duration in hours of G2 phase. Default value corresponds to at typical HEK cycle.}
 
-\item{ccDurationM}{Double that estimates the duration in hours of M phase.}
+\item{ccDurationM}{Double that estimates the duration in hours of M phase. Default value corresponds to at typical HEK cycle.}
 
-\item{ccDurationTotal}{Double that estimates the duration in hours of the cell cycle.}
+\item{ccDurationTotal}{Double that estimates the duration in hours of the cell cycle. Default value corresponds to at typical HEK cycle.}
 }
 \value{
-Returns Revelio object.
+Returns a Revelio object containing the custom sequencing data for further analysis.
 }
 \description{
 'createRevelioObject' returns a Revelio object according to the specified parameters.
 }
 \details{
-A matrix of raw sequencing data as well as a table of marker gene lists have to be provided
+A matrix of raw sequencing data as well as a table of marker gene lists have to be provided.
 }
