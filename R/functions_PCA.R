@@ -154,6 +154,17 @@ getPCAGenes <- function(dataList){
   # cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
 }
+#'
+#'
+#' Perform PCA.
+#'
+#' 'getPCAData' performs a principal component analysis (PCA).
+#'
+#' The data is transformed to z-scores and PCA is applied. When creating the Revelio object, the user should have defined which genes should be utilized for the PCA. By default this should be 'variableGenes' but can be changed to 'allGenes'. Be aware that the algorithm takes much longer when using all genes.
+#'
+#' @param dataList A Revelio object that contains a raw data matrix assigned cell cycle phases.
+#' @return Returns the same Revelio object given as input but now with added PCA information under the transformedData panel.
+#'
 #' @export
 getPCAData <- function(dataList){
   startTime <- Sys.time()

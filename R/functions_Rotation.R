@@ -1,3 +1,14 @@
+#'
+#'
+#' Get Optimal Rotation.
+#'
+#' 'getOptimalRotation' rotates the PCA space to reveal the cell cycle in the first two dimensions.
+#'
+#' The PCs that are dominated by cell cycle effects are isolated and sequences of three-dimensional rotations are performed, minimizing the cluster score in the corresponding third dimension. This isolates the cell cycle signal into the first dimensions.
+#'
+#' @param dataList A Revelio object that contains a raw data matrix, assigned cell cycle phases and PCA information.
+#' @return Returns the same Revelio object given as input with an added panel dc in the transformed data panel. Also the angle, radius und pseudotime ordering is added to the cellInfo panel.
+#'
 #' @export
 getOptimalRotation <- function(dataList){
   startTime <- Sys.time()
