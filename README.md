@@ -10,12 +10,12 @@ devtools::install_github('danielschw188/Revelio')
 ## How to Use
 
 The algorithm needs two inputs from the user:
-1. A gene-by-cell data matrix that contains the UMI counts as entries. Comments about formatting:
+1. 'rawData': A gene-by-cell data matrix that contains the UMI counts as entries. Comments about formatting:
     - gene names are placed in the row names
     - cell IDs are placed in the column names
     - entries of the matrix are typically positive integers
     - NA entries should be replaced by 0
-2. A matrix of gene names that will be used for marker gene lists. Comments about formatting:
+2. 'cyclicGenes': A matrix of gene names that will be used for marker gene lists. Comments about formatting:
     - the entries of each column of the matrix represents a separate marker gene list for a specific phase or phase transition
     - the name of the phase or phase transition is placed in the column names
     - the entries of the matrix are the gene names
