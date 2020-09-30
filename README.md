@@ -39,7 +39,7 @@ myData <- getOptimalRotation(dataList = myData)
 
 Due to the linearity of our algorithm and the fact that cell cycle effects are functionally isolated into two dimensions, we can now proceed to remove cell cycle effects from the normalized data matrix:
 ```
-normalizedDataNoCCEffect <- removeCCEffects(dataList = myData)
+normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
 
 
