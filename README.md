@@ -36,6 +36,11 @@ The data is now prepared for analysis which is done in two steps. First, a stand
 myData <- getPCAData(dataList = myData)
 myData <- getOptimalRotation(dataList = myData)
 ```
+If results should be plotted right away, the parameter 'boolPlotResults' has to be set TRUE:
+```
+myData <- getPCAData(dataList = myData, boolPlotResults = TRUE)
+myData <- getOptimalRotation(dataList = myData, boolPlotResults = TRUE)
+```
 
 Due to the linearity of our algorithm and the fact that cell cycle effects are functionally isolated into two dimensions, we can now proceed to remove cell cycle effects from the normalized data matrix:
 ```
