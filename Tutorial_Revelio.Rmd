@@ -21,8 +21,10 @@ cyclicGenesSource <- xlsx::read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucke
 myData <- createRevelioObject(rawData = dataSource,
                               cyclicGenes = cyclicGenesSource)
 myData <- getCellCyclePhaseAssignInformation(dataList = myData)
-myData <- getPCAData(dataList = myData)
-myData <- getOptimalRotation(dataList = myData)
+myData <- getPCAData(dataList = myData,
+                     boolPlotResults = TRUE)
+myData <- getOptimalRotation(dataList = myData,
+                             boolPlotResults = TRUE)
 
 ```
 

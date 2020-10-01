@@ -163,10 +163,12 @@ getPCAGenes <- function(dataList){
 #' The data is transformed to z-scores and PCA is applied. When creating the Revelio object, the user should have defined which genes should be utilized for the PCA. By default this should be 'variableGenes' but can be changed to 'allGenes'. Be aware that the algorithm takes much longer when using all genes.
 #'
 #' @param dataList A Revelio object that contains a raw data matrix assigned cell cycle phases.
+#' @param boolPlotResults TRUE/FALSE if pairwise PCA plots should be shown.
 #' @return Returns the same Revelio object given as input but now with added PCA information under the transformedData panel.
 #'
 #' @export
-getPCAData <- function(dataList){
+getPCAData <- function(dataList,
+                       boolPlotResults = FALSE){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating PCA: ', sep = ''))
 
@@ -190,6 +192,51 @@ getPCAData <- function(dataList){
                                                      isComponentAssociatedWithCC = boolOutliers)
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
+
+  if (boolPlotResults){
+    plotParameters <- list()
+    plotParameters$colorPaletteCellCyclePhasesGeneral <- c('#ac4343', '#466caf', '#df8b3f', '#63b558', '#e8d760', '#61c5c7', '#f04ddf', '#a555d4')
+    plotParameters$plotLabelTextSize <- 8
+    plotParameters$plotDotSize <- 0.1
+    plotParameters$fontFamily <- 'Helvetica'
+    plotParameters$fontSize <- 8
+    plotParameters$colorPaletteCellCyclePhasesGeneral <- plotParameters$colorPaletteCellCyclePhasesGeneral[1:length(levels(dataList@cellInfo$ccPhase))]
+    names(plotParameters$colorPaletteCellCyclePhasesGeneral) <- levels(dataList@cellInfo$ccPhase)
+
+    indicesToShow <- 1:3
+
+    listOfPlotsPCAPairwise <- list()
+    pcLabels <- paste('PC', indicesToShow, sep = '')
+    for (i in pcLabels[1:(length(pcLabels)-1)]){
+      for (j in pcLabels[(which(i==pcLabels)+1):length(pcLabels)]){
+        plotBoundary <- max(dataList@transformedData$pca$data[c(i,j),])
+        dataToUse <- cbind(as.data.frame(t(dataList@transformedData$pca$data[c(i,j),])), colorCode = dataList@cellInfo$ccPhase)
+        listOfPlotsPCAPairwise[[paste('plot_', i, j, sep = '')]] <- ggplot(data = dataToUse)+
+          theme_gray(base_size = plotParameters$plotLabelTextSize)+
+          theme(text=element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize),
+                axis.text = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize-1),
+                axis.title = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize),
+                legend.text = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize-1),
+                legend.title = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize))+
+          geom_point(aes_string(x = i, y = j, color = 'colorCode'), size = plotParameters$plotDotSize/5)+
+          xlim(c(-plotBoundary,plotBoundary))+
+          ylim(c(-plotBoundary,plotBoundary))+
+          theme(aspect.ratio=1)+
+          scale_color_manual(values = plotParameters$colorPaletteCellCyclePhasesGeneral[levels(dataList@cellInfo$ccPhase)],
+                             labels = levels(dataList@cellInfo$ccPhase))+
+          theme(legend.position = 'right',
+                axis.text.y=element_text(angle=90, hjust=0.5),
+                legend.title = element_blank(),
+                legend.key.size = unit(0.35,"line"),
+                legend.box.margin = margin(0,0,0,-2),
+                legend.margin = margin(0,0,0,0))+
+          guides(color = guide_legend(override.aes = list(size = 0.8)))
+      }
+    }
+
+    gridExtra::grid.arrange(grobs = listOfPlotsPCAPairwise, ncol = 3)
+  }
+
   return(dataList)
 }
 doPCA <- function(data){

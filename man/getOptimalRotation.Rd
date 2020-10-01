@@ -4,10 +4,12 @@
 \alias{getOptimalRotation}
 \title{Get Optimal Rotation.}
 \usage{
-getOptimalRotation(dataList)
+getOptimalRotation(dataList, boolPlotResults = FALSE)
 }
 \arguments{
 \item{dataList}{A Revelio object that contains a raw data matrix, assigned cell cycle phases and PCA information.}
+
+\item{boolPlotResults}{TRUE/FALSE if resulting cell cycle should be plotted.}
 }
 \value{
 Returns the same Revelio object given as input with an added panel dc in the transformed data panel. Also the angle, radius und pseudotime ordering is added to the cellInfo panel.

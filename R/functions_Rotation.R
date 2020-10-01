@@ -7,10 +7,12 @@
 #' The PCs that are dominated by cell cycle effects are isolated and sequences of three-dimensional rotations are performed, minimizing the cluster score in the corresponding third dimension. This isolates the cell cycle signal into the first dimensions.
 #'
 #' @param dataList A Revelio object that contains a raw data matrix, assigned cell cycle phases and PCA information.
+#' @param boolPlotResults TRUE/FALSE if resulting cell cycle should be plotted.
 #' @return Returns the same Revelio object given as input with an added panel dc in the transformed data panel. Also the angle, radius und pseudotime ordering is added to the cellInfo panel.
 #'
 #' @export
-getOptimalRotation <- function(dataList){
+getOptimalRotation <- function(dataList,
+                               boolPlotResults = FALSE){
   startTime <- Sys.time()
   cat(paste(Sys.time(), ': calculating optimal rotation: ', sep = ''))
 
@@ -40,6 +42,60 @@ getOptimalRotation <- function(dataList){
   dataList <- getCCSorting(dataList = dataList)
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
+
+  if (boolPlotResults){
+    plotParameters <- list()
+    plotParameters$colorPaletteCellCyclePhasesGeneral <- c('#ac4343', '#466caf', '#df8b3f', '#63b558', '#e8d760', '#61c5c7', '#f04ddf', '#a555d4')
+    plotParameters$plotLabelTextSize <- 8
+    plotParameters$plotDotSize <- 0.1
+    plotParameters$fontFamily <- 'Helvetica'
+    plotParameters$fontSize <- 8
+    plotParameters$colorPaletteCellCyclePhasesGeneral <- plotParameters$colorPaletteCellCyclePhasesGeneral[1:length(levels(dataList@cellInfo$ccPhase))]
+    names(plotParameters$colorPaletteCellCyclePhasesGeneral) <- levels(dataList@cellInfo$ccPhase)
+
+    plotBoundary <- max(dataList@transformedData$dc$data[c('DC1', 'DC2'),])*0.78
+
+    ccPhaseBorderPathPolar <- data.frame(angle = rep(0,7), radius = rep(0,7))
+    ccPhaseBorderPathPolar[c(1,3,5,7),1] <- 2*pi*(1-cumsum(c(dataList@datasetInfo$ccDurationG1, dataList@datasetInfo$ccDurationS, dataList@datasetInfo$ccDurationG2, dataList@datasetInfo$ccDurationM))/dataList@datasetInfo$ccDurationTotal)
+    ccPhaseBorderPathPolar[c(1,3,5,7),2] <- 50
+    ccPhaseBorderPathCartesian <- ccPhaseBorderPathPolar
+    ccPhaseBorderPathCartesian[,1] <- ccPhaseBorderPathPolar[,2]*cos(ccPhaseBorderPathPolar[,1])
+    ccPhaseBorderPathCartesian[,2] <- ccPhaseBorderPathPolar[,2]*sin(ccPhaseBorderPathPolar[,1])
+    colnames(ccPhaseBorderPathCartesian) <- c('xValue', 'yValue')
+
+    labelPositionHelp <- append(2*pi, ccPhaseBorderPathPolar[c(1,3,5,7),1])
+    labelPositionHelp <- (labelPositionHelp[1:(length(labelPositionHelp)-1)]-labelPositionHelp[2:length(labelPositionHelp)])/2+labelPositionHelp[2:length(labelPositionHelp)]
+    labelRadiusHelp <- labelPositionHelp
+    labelRadiusHelp[(labelRadiusHelp>pi/4)&(labelRadiusHelp<3*pi/4)] <- labelRadiusHelp[(labelRadiusHelp>pi/4)&(labelRadiusHelp<3*pi/4)]-pi/2
+    labelRadiusHelp[(labelRadiusHelp>5*pi/4)&(labelRadiusHelp<7*pi/4)] <- labelRadiusHelp[(labelRadiusHelp>5*pi/4)&(labelRadiusHelp<7*pi/4)]-pi/2
+
+    labelPositionPolar <- data.frame(angle = labelPositionHelp, radius = sqrt((plotBoundary*tan(labelRadiusHelp))^2+plotBoundary^2), label = c('G1', 'S', 'G2', 'M'))
+    labelPositionCartesian <- labelPositionPolar
+    labelPositionCartesian[,1] <- labelPositionPolar[,2]*cos(labelPositionPolar[,1])
+    labelPositionCartesian[,2] <- labelPositionPolar[,2]*sin(labelPositionPolar[,1])
+    colnames(labelPositionCartesian) <- c('xValue', 'yValue', 'label')
+
+    plotDC1DC2 <- ggplot(data = cbind(as.data.frame(t(dataList@transformedData$dc$data)), ccPhase = dataList@cellInfo$ccPhase))+
+      theme_gray(base_size = plotParameters$plotLabelTextSize)+
+      theme(text=element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize),
+            axis.text = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize-1),
+            axis.title = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize),
+            legend.text = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize-1),
+            legend.title = element_text(family=plotParameters$fontFamily, size=plotParameters$fontSize))+
+      geom_point(aes(x = DC1, y = DC2, color = ccPhase), size = plotParameters$plotDotSize*5)+
+      coord_cartesian(xlim = c(-plotBoundary, plotBoundary),ylim = c(-plotBoundary, plotBoundary))+
+      scale_color_manual(values = plotParameters$colorPaletteCellCyclePhasesGeneral,
+                         labels = levels(dataList@cellInfo$ccPhase))+
+      theme(legend.position = 'right',
+            axis.text.y=element_text(angle=90, hjust=0.5),
+            legend.title = element_blank(),
+            aspect.ratio=1)+
+      guides(color = guide_legend(override.aes = list(size = 1)))
+
+    grid.arrange(plotDC1DC2)
+
+  }
+
   return(dataList)
 }
 calculateOptimalRotation <- function(pcaData,

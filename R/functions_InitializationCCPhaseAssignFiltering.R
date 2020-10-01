@@ -1,6 +1,7 @@
-#' @import dplyr
+#' @import dplyr ggplot2
 #' @importFrom magrittr %>%
 #' @importFrom methods new
+#' @importFrom gridExtra grid.arrange
 #'
 setClass('Revelio',
          slots = list(datasetInfo = 'list',

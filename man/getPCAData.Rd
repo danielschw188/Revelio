@@ -4,10 +4,12 @@
 \alias{getPCAData}
 \title{Perform PCA.}
 \usage{
-getPCAData(dataList)
+getPCAData(dataList, boolPlotResults = FALSE)
 }
 \arguments{
 \item{dataList}{A Revelio object that contains a raw data matrix assigned cell cycle phases.}
+
+\item{boolPlotResults}{TRUE/FALSE if pairwise PCA plots should be shown.}
 }
 \value{
 Returns the same Revelio object given as input but now with added PCA information under the transformedData panel.
