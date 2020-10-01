@@ -19,7 +19,7 @@ The algorithm needs two inputs from the user:
     - the entries of each column of the matrix represents a separate marker gene list for a specific phase or phase transition
     - the name of the phase or phase transition is placed in the column names
     - the entries of the matrix are the gene names
-    - if one of the marker gene lists is shorter than the longest marker gene list, all additionally entries should be replaced by NA
+    - if one of the marker gene lists is shorter than the longest marker gene list, all additionally entries of the shorter list should be set to NA
     
 Then the Revelio algorithm can be executed. First, a Revelio object is created:
 ```
