@@ -11,20 +11,25 @@ output:
 
 ```{r}
 library(Revelio)
-library(xlsx)
-datasetToAnalyse <- 'sf002'
-dataList <- readRDS(paste('~/Studium Doktorarbeit/Projects/CellCycleSorting/Scripts/Revelio_0.1/OutputDataFiles/', datasetToAnalyse, '/', datasetToAnalyse, '_FullData.rds', sep = ''))
-dataSource <- dataList@DGEs$countData
-cyclicGenesSource <- xlsx::read.xlsx(dataList@datasetInfo$ccPhaseAssignGeneBucketListFileLocation, 1)
+myData <- createRevelioObject(rawData = revelioTestData_rawDataMatrix,
+                              cyclicGenes = revelioTestData_cyclicGenes)
+```
 
-
-myData <- createRevelioObject(rawData = dataSource,
-                              cyclicGenes = cyclicGenesSource)
+```{r}
 myData <- getCellCyclePhaseAssignInformation(dataList = myData)
+```
+
+```{r}
 myData <- getPCAData(dataList = myData,
                      boolPlotResults = TRUE)
+```
+
+```{r}
 myData <- getOptimalRotation(dataList = myData,
                              boolPlotResults = TRUE)
+```
 
+```{r}
+normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
 
