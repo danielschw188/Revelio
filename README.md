@@ -48,6 +48,6 @@ Due to the linearity of our algorithm and the fact that cell cycle effects are f
 ```
 normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
-
+The output is a gene-by-cell data matrix of normalized counts where cell cycle effects have been removed. This data can now be utilized for further analysis (such as doing another PCA or differential gene expression analysis).
 
 ## References
