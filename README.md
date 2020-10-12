@@ -21,7 +21,7 @@ The algorithm needs two inputs from the user:
     - the entries of the matrix are the gene names
     - if one of the marker gene lists is shorter than the longest marker gene list, all additionally entries of the shorter list should be set to NA
     
-We have included sample data for these two inputs into the package. The sample raw data matrix is called 'revelioTestData_rawDataMatrix' and the table of marker gene lists is called 'revelioTestData_cyclicGenes'. During the following example, we will utilize these two inputs. When analyzing your own data, the variable names of your own data have to be exchanged.
+We have included sample data for these two inputs into the package. The sample raw data matrix is called 'revelioTestData_rawDataMatrix' and the table of marker gene lists is called 'revelioTestData_cyclicGenes'. This is the data illustrated in Figure 1 of the publication. During the following example, we will utilize these two inputs. When analyzing your own data, the variable names of your own data have to be exchanged.
 
 Now the Revelio algorithm can be executed. First, a Revelio object is created:
 ```
@@ -48,6 +48,6 @@ Due to the linearity of our algorithm and the fact that cell cycle effects are f
 ```
 normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
-
+The output is a gene-by-cell data matrix of normalized counts where cell cycle effects have been removed. This data can now be utilized for further analysis (such as doing another PCA or differential gene expression analysis).
 
 ## References
