@@ -51,3 +51,5 @@ normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 The output is a gene-by-cell data matrix of normalized counts where cell cycle effects have been removed. This data can now be utilized for further analysis (such as doing another PCA or differential gene expression analysis).
 
 ## References
+
+Schwabe, Daniel et al. (2020): „The transcriptome dynamics of single cells during the cell cycle“. In: Molecular Systems Biology; DOI: 10.15252/msb.20209946
