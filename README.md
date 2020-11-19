@@ -52,4 +52,4 @@ The output is a gene-by-cell data matrix of normalized counts where cell cycle e
 
 ## References
 
-Schwabe et al. (2020): „The transcriptome dynamics of single cells during the cell cycle“. In: Molecular Systems Biology; DOI: 10.15252/msb.20209946
+Schwabe D, Formichetti S, Junker JP, Falcke M, Rajewsky N. The transcriptome dynamics of single cells during the cell cycle. Mol Syst Biol. 2020 Nov;16(11):e9946. doi: 10.15252/msb.20209946. PMID: 33205894.
