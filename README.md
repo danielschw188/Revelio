@@ -53,7 +53,7 @@ The output is a gene-by-cell data matrix of normalized counts where cell cycle e
 
 ### Velocity analysis, intronic data required
 
-For the velocity analysis, the algorithm requires another input from the user:
+For the velocity analysis, the algorithm requires another input from the user:  
 3. 'rawIntronicData': A gene-by-cell data matrix that contains the UMI counts as entries. Formatting should be the same as 'rawData'. Additionally, the cell IDs should match the cell IDs found in 'rawData'.
 
 We have included a sample data into the package as well, called 'revelioTestData_rawIntronicMatrix'. Together with the data from the previous section, this data is illustrated in Figure 2 of the publication. Again, please adjust your variable name when using your own data.
