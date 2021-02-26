@@ -2,8 +2,13 @@
 
 export(createRevelioObject)
 export(getCellCyclePhaseAssignInformation)
+export(getExtrapolatedStateInDCSpace)
 export(getOptimalRotation)
 export(getPCAData)
+export(getVelocityGridAlongThirdDimensions)
+export(getVelocityGridCC)
+export(getVelocityMatrix)
+export(plotVelocityOnAveragedTrajectory)
 export(removeCCEffects)
 import(dplyr)
 import(ggplot2)

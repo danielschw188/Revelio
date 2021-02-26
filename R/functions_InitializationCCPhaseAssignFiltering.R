@@ -54,10 +54,10 @@ createRevelioObject <- function(rawData,
                                 ccPhaseAssignThresholdHighestPhaseScore = 0.75,
                                 ccPhaseAssignThresholdSecondHighestPhaseScore = 0.5,
                                 pcaGenes = 'variableGenes',
-                                ccDurationG1 = 0.487*19.33,
-                                ccDurationS = 0.392*19.33,
-                                ccDurationG2 = 0.093*19.33,
-                                ccDurationM = 0.028*19.33,
+                                ccDurationG1 = 6.88,
+                                ccDurationS = 8.38,
+                                ccDurationG2 = 3.05,
+                                ccDurationM = 1.02,
                                 ccDurationTotal = 19.33){
 
   startTime <- Sys.time()
@@ -191,7 +191,11 @@ getCellCyclePhaseAssignInformation <- function(dataList){
   colnames(phaseScoreNormalized) <- paste(colnames(phaseScoreNormalized), '_zScore', sep = '')
   phaseAssignStatistics <- data.frame(ccPhase = resultList[['ccPhase']], meanOfPhaseScore = apply(resultList[['phaseScore']], 1, mean), sdOfPhaseScore = apply(resultList[['phaseScore']], 1, sd), highestPhaseScore = resultList[['highestPhaseScore']], secondHighestPhaseScore = resultList[['secondHighestPhaseScore']])
   phaseAssignStatistics <- cbind(phaseAssignStatistics, phaseScore, phaseScoreNormalized)
-  dataList@geneInfo <- cbind(dataList@geneInfo, ccPhase = resultList[['geneCCPhase']])
+  if (is.null(dataList@geneInfo$ccPhase)){
+    dataList@geneInfo <- cbind(dataList@geneInfo, ccPhase = resultList[['geneCCPhase']])
+  }else{
+    dataList@geneInfo[,'ccPhase'] <- resultList[['geneCCPhase']]
+  }
 
   #get outliers
   phaseDifferenceBetweenHighestAndSecondHighest <- t(subset(phaseAssignStatistics, select = colnames(phaseScoreNormalized)))
@@ -207,7 +211,11 @@ getCellCyclePhaseAssignInformation <- function(dataList){
   phaseAssignStatistics <- cbind(phaseAssignStatistics, isOutlierSuspectedDoublets, isOutlierNoConfidenceInPhaseScore)
 
   #combine data
-  dataList@cellInfo <- cbind(dataList@cellInfo, phaseAssignStatistics)
+  if (is.null(dataList@cellInfo$phaseAssignStatistics)){
+    dataList@cellInfo <- cbind(dataList@cellInfo, phaseAssignStatistics)
+  }else{
+    dataList@cellInfo[,'phaseAssignStatistics'] <- phaseAssignStatistics
+  }
 
   #filter outliers
   dataList <- getFilteredDataByCCPhaseAssignOutliers(dataList = dataList)

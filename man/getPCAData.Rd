@@ -7,7 +7,7 @@
 getPCAData(dataList, boolPlotResults = FALSE)
 }
 \arguments{
-\item{dataList}{A Revelio object that contains a raw data matrix assigned cell cycle phases.}
+\item{dataList}{A Revelio object that contains a raw data matrix with assigned cell cycle phases.}
 
 \item{boolPlotResults}{TRUE/FALSE if pairwise PCA plots should be shown.}
 }

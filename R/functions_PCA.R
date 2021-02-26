@@ -34,7 +34,13 @@ getVariableGenes <- function(dataList){
   meanGeneExpression <- resultList[['meanGeneExpr']]
   normalizedDispersionPerGene <- resultList[['normDispPerGene']]
   variableGenes[variableGenesHelp] <- TRUE
-  dataList@geneInfo <- cbind(dataList@geneInfo, variableGenes, meanGeneExpression, normalizedDispersionPerGene)
+  if (is.null(dataList@geneInfo$variableGenes)){
+    dataList@geneInfo <- cbind(dataList@geneInfo, variableGenes, meanGeneExpression, normalizedDispersionPerGene)
+  }else{
+    dataList@geneInfo[,'variableGenes'] <- variableGenes
+    dataList@geneInfo[,'meanGeneExpression'] <- meanGeneExpression
+    dataList@geneInfo[,'normalizedDispersionPerGene'] <- normalizedDispersionPerGene
+  }
 
   # cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
@@ -129,14 +135,22 @@ getPCAGenes <- function(dataList){
       # if (dataList@datasetInfo$intronDataExists){
       #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = dataList@geneInfo[,'variableGenes']&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
       # }else{
+      if (is.null(dataList@geneInfo$pcaGenes)){
         dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = dataList@geneInfo[,'variableGenes'])
+      }else{
+        dataList@geneInfo[,'pcaGenes'] <- dataList@geneInfo[,'variableGenes']
+      }
       # }
     }else{
       if (dataList@datasetInfo$pcaGenes == 'allGenes'){
         # if (dataList@datasetInfo$intronDataExists){
         #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = rep(TRUE, dim(dataList@geneInfo)[1])&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
         # }else{
+        if (is.null(dataList@geneInfo$pcaGenes)){
           dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = rep(TRUE, dim(dataList@geneInfo)[1]))
+        }else{
+          dataList@geneInfo[,'pcaGenes'] <- rep(TRUE, dim(dataList@geneInfo)[1])
+        }
         # }
       }
     }
@@ -147,7 +161,11 @@ getPCAGenes <- function(dataList){
     # if (dataList@datasetInfo$intronDataExists){
     #   dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = pcaGenesHelp&(rowSums(dataList@DGEs$intronCountData[dataList@geneInfo$geneID,])>0))
     # }else{
+    if (is.null(dataList@geneInfo$pcaGenes)){
       dataList@geneInfo <- cbind(dataList@geneInfo, pcaGenes = pcaGenesHelp)
+    }else{
+      dataList@geneInfo[,'pcaGenes'] <- pcaGenesHelp
+    }
     # }
   }
 
@@ -162,7 +180,7 @@ getPCAGenes <- function(dataList){
 #'
 #' The data is transformed to z-scores and PCA is applied. When creating the Revelio object, the user should have defined which genes should be utilized for the PCA. By default this should be 'variableGenes' but can be changed to 'allGenes'. Be aware that the algorithm takes much longer when using all genes.
 #'
-#' @param dataList A Revelio object that contains a raw data matrix assigned cell cycle phases.
+#' @param dataList A Revelio object that contains a raw data matrix with assigned cell cycle phases.
 #' @param boolPlotResults TRUE/FALSE if pairwise PCA plots should be shown.
 #' @return Returns the same Revelio object given as input but now with added PCA information under the transformedData panel.
 #'
@@ -187,9 +205,14 @@ getPCAData <- function(dataList,
   boolOutliers <- rep(FALSE, length(cellCycleScore))
   boolOutliers[1:(min(length(cellCycleScore),100))] <- calculateOutliersInVector(data = as.vector(cellCycleScore[1:(min(length(cellCycleScore),100))]),
                                                                                  outlierThreshold = 2)
-  dataList@transformedData$pca$pcProperties <- cbind(dataList@transformedData$pca$pcProperties,
-                                                     ccScore = cellCycleScore,
-                                                     isComponentAssociatedWithCC = boolOutliers)
+  if (is.null(dataList@transformedData$pca$pcProperties$ccScore)){
+    dataList@transformedData$pca$pcProperties <- cbind(dataList@transformedData$pca$pcProperties,
+                                                       ccScore = cellCycleScore,
+                                                       isComponentAssociatedWithCC = boolOutliers)
+  }else{
+    dataList@transformedData$pca$pcProperties[,'ccScore'] <- cellCycleScore
+    dataList@transformedData$pca$pcProperties[,'isComponentAssociatedWithCC'] <- boolOutliers
+  }
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
 

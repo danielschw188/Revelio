@@ -33,3 +33,39 @@ myData <- getOptimalRotation(dataList = myData,
 normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
 
+```{r}
+myData <- getVelocityMatrix(dataList = myData,
+                            rawIntronicData = revelioTestData_rawIntronicMatrix)
+```
+
+```{r}
+myData <- getPCAData(dataList = myData,
+                     boolPlotResults = FALSE)
+myData <- getOptimalRotation(dataList = myData,
+                             boolPlotResults = TRUE)
+```
+
+```{r}
+myData <- getExtrapolatedStateInDCSpace(dataList = myData)
+```
+
+```{r}
+myData <- getVelocityGridCC(dataList = myData,
+                            sigma = 0.6,
+                            numberOfGridPointsOneSide = 20,
+                            boolPlotResults = TRUE)
+```
+
+```{r}
+myData <- plotVelocityOnAveragedTrajectory(dataList = myData,
+                                           numberOfAnchors = 10)
+```
+
+```{r}
+myData <- getVelocityGridAlongThirdDimensions(dataList = myData,
+                                              whichThirdDimension = 3,
+                                              sigma = 1.5,
+                                              numberOfGridPointsOneSide = 20,
+                                              boolPlotResults = TRUE)
+```
+

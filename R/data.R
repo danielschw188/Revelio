@@ -12,3 +12,11 @@
 #'
 #' @format A data frame with 216 rows (length of the longest marker gene list) and 5 variables (cell cycle phases and transitions: G1.S, S, G2, G2.M, M.G1).
 "revelioTestData_cyclicGenes"
+#'
+#'
+#' A single-cell gene expression data matrix of intronic counts.
+#'
+#' A dataset that contains a gene-by-cell matrix with UMI counts as entries.
+#'
+#' @format A data frame with 19201 rows (genes) and 1477 variables (cells).
+"revelioTestData_rawIntronicMatrix"

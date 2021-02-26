@@ -19,10 +19,10 @@ createRevelioObject(
   ccPhaseAssignThresholdHighestPhaseScore = 0.75,
   ccPhaseAssignThresholdSecondHighestPhaseScore = 0.5,
   pcaGenes = "variableGenes",
-  ccDurationG1 = 0.487 * 19.33,
-  ccDurationS = 0.392 * 19.33,
-  ccDurationG2 = 0.093 * 19.33,
-  ccDurationM = 0.028 * 19.33,
+  ccDurationG1 = 6.88,
+  ccDurationS = 8.38,
+  ccDurationG2 = 3.05,
+  ccDurationM = 1.02,
   ccDurationTotal = 19.33
 )
 }

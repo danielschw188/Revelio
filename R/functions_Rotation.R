@@ -25,21 +25,34 @@ getOptimalRotation <- function(dataList,
   boolOutliers <- rep(FALSE, length(cellCycleScore))
   boolOutliers[1:(min(length(cellCycleScore),100))] <- calculateOutliersInVector(data = as.vector(cellCycleScore[1:(min(length(cellCycleScore),100))]),
                                                                                  outlierThreshold = 2)
-  dataList@transformedData$dc$dcProperties <- cbind(dataList@transformedData$dc$dcProperties,
-                                                    ccScore = cellCycleScore,
-                                                    isComponentAssociatedWithCC = boolOutliers)
+  if (is.null(dataList@transformedData$dc$dcProperties$ccScore)){
+    dataList@transformedData$dc$dcProperties <- cbind(dataList@transformedData$dc$dcProperties,
+                                                      ccScore = cellCycleScore,
+                                                      isComponentAssociatedWithCC = boolOutliers)
+  }else{
+    dataList@transformedData$dc$dcProperties[,'ccScore'] <- cellCycleScore
+    dataList@transformedData$dc$dcProperties[,'isComponentAssociatedWithCC'] <- boolOutliers
+  }
 
   thresholdForPCWeightToBeSignificant <- sqrt(1/dim(dataList@transformedData$pca$data)[1])
   ccGenesHelp <- rep(FALSE, dim(dataList@geneInfo)[1])
   names(ccGenesHelp) <- dataList@geneInfo[,'geneID']
   ccGenesHelp[dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes][which((abs(dataList@transformedData$dc$weights[1,])>thresholdForPCWeightToBeSignificant)|(abs(dataList@transformedData$dc$weights[2,])>thresholdForPCWeightToBeSignificant))]] <- TRUE
-  dataList@geneInfo <- cbind(dataList@geneInfo, ccGenes = ccGenesHelp)
+  if (is.null(dataList@geneInfo$ccGenes)){
+    dataList@geneInfo <- cbind(dataList@geneInfo, ccGenes = ccGenesHelp)
+  }else{
+    dataList@geneInfo[,'ccGenes'] <- ccGenesHelp
+  }
 
   #rotate to cell division
   dataList <- getRotation2D(dataList = dataList)
 
   #get sorted cell info
   dataList <- getCCSorting(dataList = dataList)
+
+  if (is.null(dataList@datasetInfo$previousWeights)&is.null(dataList@DGEs$intronCountData)){
+    dataList@datasetInfo$previousWeights <- t(dataList@transformedData$dc$weights[c(1,2),])
+  }
 
   cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
 
@@ -361,10 +374,10 @@ getRotation2D <- function(dataList){
 
   dataList <- alignCellDivisionToXAxis(dataList)
 
-  # if (!(any(dataList@datasetInfo$goldStandardWeights == '')|is.null(dataList@datasetInfo$goldStandardWeights))){
-  #   dataList <- alignCellCycleToGoldStandard(dataList,
-  #                                            weightsGoldStandard = dataList@datasetInfo$goldStandardWeights)
-  # }
+  if (!(any(dataList@datasetInfo$previousWeights == '')|is.null(dataList@datasetInfo$previousWeights))){
+    dataList <- alignCellCycleToPreviousWeights(dataList,
+                                             weightsPrevious = dataList@datasetInfo$previousWeights)
+  }
 
   # cat(paste(round(Sys.time()-startTime, 2), attr(Sys.time()-startTime, 'units'), '\n', sep = ''))
   return(dataList)
@@ -473,118 +486,119 @@ calculateAverageUMIPerIntervalBasedOnIndex <- function(countData,
 
   return (averageUMICountPerWindow)
 }
-# alignCellCycleToGoldStandard <- function(dataList,
-#                                          weightsGoldStandard){
-#   numberOfIntervals <- 1000
-#   weightsDC1GoldStandard <- weightsGoldStandard[,1]
-#   names(weightsDC1GoldStandard) <- rownames(weightsGoldStandard)
-#   weightsDC2GoldStandard <- weightsGoldStandard[,2]
-#   names(weightsDC2GoldStandard) <- rownames(weightsGoldStandard)
-#
-#   dataToUse <- t(as.matrix(dataList@transformedData$dc$data[c(1,2),]))
-#   dataWeightsToUse <- t(as.matrix(dataList@transformedData$dc$weights[c(1,2),]))
-#   if (dataList@datasetInfo$cellType == '3T3'){
-#     convertMouseGeneList <- function(x){
-#
-#       #require("biomaRt")
-#       human = biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-#       mouse = biomaRt::useMart("ensembl", dataset = "mmusculus_gene_ensembl")
-#
-#       #genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
-#       #humanx <- genesV2[, 2]
-#
-#       mouseGenes <- mygene::queryMany(x, scopes="symbol", fields="ensembl.gene", species="mouse")
-#       mouseGenesID <- lapply(mouseGenes@listData$ensembl,'[[',1)
-#       for (i in 1:length(mouseGenesID)){
-#         if (length(mouseGenesID[[i]])>1){
-#           mouseGenesID[[i]] <- mouseGenesID[[i]][1]
-#         }
-#       }
-#       mouseGenesID <- as.character(mouseGenesID)
-#       mouseGenesNames <- as.character(lapply(mouseGenes@listData$query,'[[',1))
-#       mouseGenesID <- mouseGenesID[match(unique(mouseGenesNames), mouseGenesNames)]
-#       mouseGenesNames <- mouseGenesNames[match(unique(mouseGenesNames), mouseGenesNames)]
-#
-#       #indexWithNullEntry <- mouseGenesID=='NULL'
-#       #xShortened <- x[!(mouseGenesID=='NULL')]
-#       mouseGenesIDShortened <- mouseGenesID[!(mouseGenesID=='NULL')]
-#       #mouseGenesNamesShortened <- mouseGenesNames[!(mouseGenesID=='NULL')]
-#
-#       genesV2 = biomaRt::getLDS(attributes = c("ensembl_gene_id","mgi_symbol"), filters = "ensembl_gene_id", values = mouseGenesIDShortened , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
-#
-#       indexOfGenesWhereNoAssociatedHumanGeneIsFound <- !(mouseGenesID%in%genesV2[,1])
-#       matchOfIndexes <- match(mouseGenesID[(mouseGenesID%in%genesV2[,1])], genesV2[,1])
-#
-#       humanGeneNames <- as.data.frame(matrix(0L, length(x), 1))
-#       humanGeneNames[which(!(indexOfGenesWhereNoAssociatedHumanGeneIsFound)),] <- genesV2[matchOfIndexes,3]
-#       humanGeneNames <- as.character(t(humanGeneNames))
-#       helpVar <- table(humanGeneNames[!(humanGeneNames=='0')])
-#       helpVar <- names(helpVar[helpVar>1])
-#       for (i in 1:length(helpVar)){
-#         indexesOfDoubleName <- which(humanGeneNames == helpVar[i])
-#         bestFit <- 0
-#         for (j in 1:length(indexesOfDoubleName)){
-#           if (tolower(x[indexesOfDoubleName[j]])==tolower((humanGeneNames[indexesOfDoubleName])[1])){
-#             bestFit <- j
-#           }
-#         }
-#         if (bestFit>0){
-#           humanGeneNames[indexesOfDoubleName[-bestFit]] <- '0'
-#         }else{
-#           humanGeneNames[indexesOfDoubleName[-1]] <- '0'
-#         }
-#       }
-#
-#       return(humanGeneNames)
-#     }
-#     mouseGenesUsedDuringPCAConverted <- as.character(t(convertMouseGeneList(dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes])))
-#     mouseGenesUsedDuringPCAConvertedWithoutZeros <- mouseGenesUsedDuringPCAConverted[!(mouseGenesUsedDuringPCAConverted=='0')]
-#     #A <- convertMouseGeneList(rownames(dataWeightsToUse))
-#     dataWeightsToUse <- dataWeightsToUse[!(mouseGenesUsedDuringPCAConverted=='0'),]
-#     rownames(dataWeightsToUse) <- mouseGenesUsedDuringPCAConvertedWithoutZeros
-#
-#     genesUsedHere <- mouseGenesUsedDuringPCAConvertedWithoutZeros
-#   }else{
-#     genesUsedHere <- dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes]
-#   }
-#   maximalCorrelation <- -1
-#   for (i in 1:numberOfIntervals){
-#     angleToRotate <- (i-1)*2*pi/numberOfIntervals
-#     rotationByAngle <- matrix(c(cos(angleToRotate), sin(angleToRotate), -sin(angleToRotate), cos(angleToRotate)), nrow = 2)
-#     dataRotated <- dataToUse%*%rotationByAngle
-#     dataWeightsRotated <- dataWeightsToUse%*%rotationByAngle
-#
-#     weightsDC1DataRotated <- dataWeightsRotated[,1]
-#     weightsDC2DataRotated <- dataWeightsRotated[,2]
-#
-#     jointGenesCurrent <- intersect(rownames(weightsGoldStandard), genesUsedHere)
-#     reducedDC1GoldStandard <- weightsDC1GoldStandard[jointGenesCurrent]
-#     reducedDC2GoldStandard <- weightsDC2GoldStandard[jointGenesCurrent]
-#     reducedDC1DataRotated <- weightsDC1DataRotated[names(weightsDC1DataRotated)%in%jointGenesCurrent]
-#     reducedDC2DataRotated <- weightsDC2DataRotated[names(weightsDC2DataRotated)%in%jointGenesCurrent]
-#
-#     currentCorrelationDC1 <- cor(reducedDC1GoldStandard, reducedDC1DataRotated)
-#     currentCorrelationDC2 <- cor(reducedDC2GoldStandard, reducedDC2DataRotated)
-#     currentCorrelationMean <- mean(c(currentCorrelationDC1, currentCorrelationDC2))
-#
-#     if (currentCorrelationMean>maximalCorrelation){
-#       optimalRotationAngle <- angleToRotate
-#       optimalInterval <- i
-#       optimalGeneSet <- jointGenesCurrent
-#       maximalCorrelation <- currentCorrelationMean
-#       maximalCorrelationDC1 <- currentCorrelationDC1
-#       maximalCorrelationDC2 <- currentCorrelationDC2
-#     }
-#   }
-#
-#   dataList@transformedData$dc$angleRotatedToGoldStandard <- optimalRotationAngle
-#   rotationByAngle <- matrix(c(cos(optimalRotationAngle), sin(optimalRotationAngle), -sin(optimalRotationAngle), cos(optimalRotationAngle)), nrow = 2)
-#   dataList@transformedData$dc$data[c(1,2),] <- t(t(dataList@transformedData$dc$data[c(1,2),])%*%rotationByAngle)
-#   dataList@transformedData$dc$weights[c(1,2),] <- t(t(dataList@transformedData$dc$weights[c(1,2),])%*%rotationByAngle)
-#   dataList@transformedData$dc$rotationMatrix[,c(1,2)] <- dataList@transformedData$dc$rotationMatrix[,c(1,2)]%*%rotationByAngle
-#
-#   return(dataList)
-# }
+alignCellCycleToPreviousWeights <- function(dataList,
+                                         weightsPrevious){
+  numberOfIntervals <- 1000
+  weightsDC1GoldStandard <- weightsPrevious[,1]
+  names(weightsDC1GoldStandard) <- rownames(weightsPrevious)
+  weightsDC2GoldStandard <- weightsPrevious[,2]
+  names(weightsDC2GoldStandard) <- rownames(weightsPrevious)
+
+  dataToUse <- t(as.matrix(dataList@transformedData$dc$data[c(1,2),]))
+  dataWeightsToUse <- t(as.matrix(dataList@transformedData$dc$weights[c(1,2),]))
+  # if (dataList@datasetInfo$cellType == '3T3'){
+  #   convertMouseGeneList <- function(x){
+  #
+  #     #require("biomaRt")
+  #     human = biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  #     mouse = biomaRt::useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  #
+  #     #genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
+  #     #humanx <- genesV2[, 2]
+  #
+  #     mouseGenes <- mygene::queryMany(x, scopes="symbol", fields="ensembl.gene", species="mouse")
+  #     mouseGenesID <- lapply(mouseGenes@listData$ensembl,'[[',1)
+  #     for (i in 1:length(mouseGenesID)){
+  #       if (length(mouseGenesID[[i]])>1){
+  #         mouseGenesID[[i]] <- mouseGenesID[[i]][1]
+  #       }
+  #     }
+  #     mouseGenesID <- as.character(mouseGenesID)
+  #     mouseGenesNames <- as.character(lapply(mouseGenes@listData$query,'[[',1))
+  #     mouseGenesID <- mouseGenesID[match(unique(mouseGenesNames), mouseGenesNames)]
+  #     mouseGenesNames <- mouseGenesNames[match(unique(mouseGenesNames), mouseGenesNames)]
+  #
+  #     #indexWithNullEntry <- mouseGenesID=='NULL'
+  #     #xShortened <- x[!(mouseGenesID=='NULL')]
+  #     mouseGenesIDShortened <- mouseGenesID[!(mouseGenesID=='NULL')]
+  #     #mouseGenesNamesShortened <- mouseGenesNames[!(mouseGenesID=='NULL')]
+  #
+  #     genesV2 = biomaRt::getLDS(attributes = c("ensembl_gene_id","mgi_symbol"), filters = "ensembl_gene_id", values = mouseGenesIDShortened , mart = mouse, attributesL = c("hgnc_symbol"), martL = human,  uniqueRows=FALSE)
+  #
+  #     indexOfGenesWhereNoAssociatedHumanGeneIsFound <- !(mouseGenesID%in%genesV2[,1])
+  #     matchOfIndexes <- match(mouseGenesID[(mouseGenesID%in%genesV2[,1])], genesV2[,1])
+  #
+  #     humanGeneNames <- as.data.frame(matrix(0L, length(x), 1))
+  #     humanGeneNames[which(!(indexOfGenesWhereNoAssociatedHumanGeneIsFound)),] <- genesV2[matchOfIndexes,3]
+  #     humanGeneNames <- as.character(t(humanGeneNames))
+  #     helpVar <- table(humanGeneNames[!(humanGeneNames=='0')])
+  #     helpVar <- names(helpVar[helpVar>1])
+  #     for (i in 1:length(helpVar)){
+  #       indexesOfDoubleName <- which(humanGeneNames == helpVar[i])
+  #       bestFit <- 0
+  #       for (j in 1:length(indexesOfDoubleName)){
+  #         if (tolower(x[indexesOfDoubleName[j]])==tolower((humanGeneNames[indexesOfDoubleName])[1])){
+  #           bestFit <- j
+  #         }
+  #       }
+  #       if (bestFit>0){
+  #         humanGeneNames[indexesOfDoubleName[-bestFit]] <- '0'
+  #       }else{
+  #         humanGeneNames[indexesOfDoubleName[-1]] <- '0'
+  #       }
+  #     }
+  #
+  #     return(humanGeneNames)
+  #   }
+  #   mouseGenesUsedDuringPCAConverted <- as.character(t(convertMouseGeneList(dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes])))
+  #   mouseGenesUsedDuringPCAConvertedWithoutZeros <- mouseGenesUsedDuringPCAConverted[!(mouseGenesUsedDuringPCAConverted=='0')]
+  #   #A <- convertMouseGeneList(rownames(dataWeightsToUse))
+  #   dataWeightsToUse <- dataWeightsToUse[!(mouseGenesUsedDuringPCAConverted=='0'),]
+  #   rownames(dataWeightsToUse) <- mouseGenesUsedDuringPCAConvertedWithoutZeros
+  #
+  #   genesUsedHere <- mouseGenesUsedDuringPCAConvertedWithoutZeros
+  # }else{
+  #   genesUsedHere <- dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes]
+  # }
+  genesUsedHere <- dataList@geneInfo$geneID[dataList@geneInfo$pcaGenes]
+  maximalCorrelation <- -1
+  for (i in 1:numberOfIntervals){
+    angleToRotate <- (i-1)*2*pi/numberOfIntervals
+    rotationByAngle <- matrix(c(cos(angleToRotate), sin(angleToRotate), -sin(angleToRotate), cos(angleToRotate)), nrow = 2)
+    dataRotated <- dataToUse%*%rotationByAngle
+    dataWeightsRotated <- dataWeightsToUse%*%rotationByAngle
+
+    weightsDC1DataRotated <- dataWeightsRotated[,1]
+    weightsDC2DataRotated <- dataWeightsRotated[,2]
+
+    jointGenesCurrent <- intersect(rownames(weightsPrevious), genesUsedHere)
+    reducedDC1GoldStandard <- weightsDC1GoldStandard[jointGenesCurrent]
+    reducedDC2GoldStandard <- weightsDC2GoldStandard[jointGenesCurrent]
+    reducedDC1DataRotated <- weightsDC1DataRotated[names(weightsDC1DataRotated)%in%jointGenesCurrent]
+    reducedDC2DataRotated <- weightsDC2DataRotated[names(weightsDC2DataRotated)%in%jointGenesCurrent]
+
+    currentCorrelationDC1 <- cor(reducedDC1GoldStandard, reducedDC1DataRotated)
+    currentCorrelationDC2 <- cor(reducedDC2GoldStandard, reducedDC2DataRotated)
+    currentCorrelationMean <- mean(c(currentCorrelationDC1, currentCorrelationDC2))
+
+    if (currentCorrelationMean>maximalCorrelation){
+      optimalRotationAngle <- angleToRotate
+      optimalInterval <- i
+      optimalGeneSet <- jointGenesCurrent
+      maximalCorrelation <- currentCorrelationMean
+      maximalCorrelationDC1 <- currentCorrelationDC1
+      maximalCorrelationDC2 <- currentCorrelationDC2
+    }
+  }
+
+  dataList@transformedData$dc$angleRotatedToGoldStandard <- optimalRotationAngle
+  rotationByAngle <- matrix(c(cos(optimalRotationAngle), sin(optimalRotationAngle), -sin(optimalRotationAngle), cos(optimalRotationAngle)), nrow = 2)
+  dataList@transformedData$dc$data[c(1,2),] <- t(t(dataList@transformedData$dc$data[c(1,2),])%*%rotationByAngle)
+  dataList@transformedData$dc$weights[c(1,2),] <- t(t(dataList@transformedData$dc$weights[c(1,2),])%*%rotationByAngle)
+  dataList@transformedData$dc$rotationMatrix[,c(1,2)] <- dataList@transformedData$dc$rotationMatrix[,c(1,2)]%*%rotationByAngle
+
+  return(dataList)
+}
 getCCSorting <- function(dataList){
   # startTime <- Sys.time()
   # cat(paste(Sys.time(), ': getting cell cycle sorting info: ', sep = ''))
