@@ -8,7 +8,7 @@ devtools::install_github('danielschw188/Revelio')
 ```
 
 ## How to Use
-# Cell Cycle only, no intronic data required
+### Cell Cycle only, no intronic data required
 
 The algorithm needs two inputs from the user:
 1. 'rawData': A gene-by-cell data matrix that contains the UMI counts as entries. Comments about formatting:
@@ -51,7 +51,7 @@ normalizedDataWithoutCCEffects <- removeCCEffects(dataList = myData)
 ```
 The output is a gene-by-cell data matrix of normalized counts where cell cycle effects have been removed. This data can now be utilized for further analysis (such as doing another PCA or differential gene expression analysis).
 
-# Velocity analysis, intronic data required
+### Velocity analysis, intronic data required
 
 For the velocity analysis, the algorithm requires another input from the user:
 3. 'rawIntronicData': A gene-by-cell data matrix that contains the UMI counts as entries. Formatting should be the same as 'rawData'. Additionally, the cell IDs should match the cell IDs found in 'rawData'.
