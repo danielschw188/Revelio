@@ -14,9 +14,9 @@ The algorithm needs two inputs from the user:
 1. 'rawData': A gene-by-cell data matrix that contains the UMI counts as entries. Comments about formatting:
     - gene names are placed in the row names
     - cell IDs are placed in the column names
-            - cell IDs should not contain the underscore symbol "_"
-            - ONLY if your data contains different batches, then the cell IDs should be formatted such that the batch identifier appears first, then an underscore, followed by the cell bar code
-            - example for a batched cell ID: "batch1_AAATGCTACGCG"
+    - cell IDs should not contain the underscore symbol "_"
+    - ONLY if your data contains different batches, then the cell IDs should be formatted such that the batch identifier appears first, then an underscore, followed by the cell bar code
+    - example for a batched cell ID: "batch1_AAATGCTACGCG"
     - entries of the matrix are typically positive integers
     - NA entries should be replaced by 0
 2. 'cyclicGenes': A matrix of gene names that will be used for marker gene lists. Comments about formatting:
